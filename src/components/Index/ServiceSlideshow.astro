@@ -1,0 +1,48 @@
+---
+import { sv1, sv2, sv3 } from "@/assets";
+import { ImageCarousel } from "@/components/ImageCarousel"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
+const services = [
+  {
+    title: "Observación Visual",
+    description:
+      "Explora el cielo nocturno con tus propios ojos utilizando nuestro telescopio de alta calidad",
+    image: sv1.src,
+    link: "/service/observacion-visual",
+  },
+  {
+    title: "EAA",
+    description:
+      "Disfruta de la Astronomía Asistida Electrónicamente para observar objetos celestes en tiempo real con tecnología avanzada.",
+    image: sv2.src,
+    link: "/service/eaa",
+  },
+  {
+    title: "Fotografía Nocturna",
+    description:
+      "Llévate un recuerdo inolvidable de estos oscuros cielos con nuestras sesiones de fotografía nocturna guiada. ¡O aprende a tomarlas tú mismo!",
+    image: sv3.src,
+    link: "/service/fotografia-nocturna",
+  },
+];
+
+const imgs = services.map((service) => ({
+  src: service.image,
+  alt: service.title,
+  title: service.title,
+  description: service.description,
+}))
+
+---
+
+<section class="p-4">
+    <Card className="bg-blue-500">
+		  <CardHeader className="text-center">
+		  	<CardTitle className="text-3xl"> Conoce nuestros servicios </CardTitle>
+		  </CardHeader>
+		  <CardContent>
+		  	<ImageCarousel client:load images={ imgs } className="flex flex-row aspect-video"/>
+		  </CardContent>
+    </Card>
+</section>

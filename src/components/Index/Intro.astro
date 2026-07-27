@@ -1,0 +1,38 @@
+---
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ImageCarousel } from "@/components/ImageCarousel"
+import { logo1, logo2, at1, at2, at3 } from "@/assets"
+
+const introImgs = [
+					{ src: at1.src },
+					{ src: at2.src },
+					{ src: at3.src },
+				]
+
+---
+
+<section class="p-4">
+	<Card className="bg-blue-500">
+		<CardHeader className="text-center">
+			<CardTitle className="text-2xl"> Servicio Astronómico </CardTitle>
+			<CardTitle> Lyrae Astronomía </CardTitle>
+		</CardHeader>
+		<CardContent className="flex flex-row items-center justify-center gap-8">
+			<img src = { logo1.src } class="rounded-full w-24" />
+			<img src = { logo2.src } class="rounded-full border-3 border-green-500 w-24" />
+		</CardContent>
+		<CardContent className="flex flex-col md:flex-row items-center">
+			<article class="px-8 md:w-1/2">
+				<p>Descubre la majestuosidad del cielo nocturno con nuestras experiencias de astroturismo.</p>
+				<p>A través de charlas interactivas, aprenderás a reconocer constelaciones, planetas y otros cuerpos celestes.</p>
+				<p>Observa el universo en detalle con telescopios de alta calidad y disfruta del Electronically Assisted Astronomy (EAA) para visualizar objetos profundos en tiempo real.</p>
+				<p>Además, captura la belleza del cosmos con sesiones de fotografía nocturna. Una experiencia única para conectar con el cielo estrellado.</p>
+			</article>
+			<ImageCarousel
+				client:load
+				images={ introImgs }
+				className="py-8 mx-16 md:w-1/2"
+			/>
+		</CardContent>
+	</Card>
+</section>
