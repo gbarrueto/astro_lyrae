@@ -1,38 +1,105 @@
 ---
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ImageCarousel } from "@/components/ImageCarousel"
-import { logo1, logo2, at1, at2, at3 } from "@/assets"
+import { Image, getImage } from "astro:assets";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { WhatsappIcon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { ImageCarousel } from "@/components/ImageCarousel";
+import { logo1, logo2, at1, mwOverCabin, nightGroup1 } from "@/assets";
 
-const introImgs = [
-					{ src: at1.src },
-					{ src: at2.src },
-					{ src: at3.src },
-				]
+// El orden cuenta la historia: dónde es, qué se hace, con qué te quedas.
+const slides = [
+	{ src: mwOverCabin, alt: "La Vía Láctea sobre las cabañas del complejo" },
+	{ src: at1, alt: "Grupo observando en una salida de astroturismo" },
+	{ src: nightGroup1, alt: "Pareja retratada bajo el cielo estrellado" },
+];
 
+// Las fotos originales pesan cientos de KB. Las optimizamos acá, en el servidor,
+// y a la isla de React solo le pasamos las URLs ya procesadas (datos serializables).
+const gallery = await Promise.all(
+	slides.map((slide) => getImage({ src: slide.src, width: 900, format: "webp" })),
+);
+
+const introImgs = gallery.map((img, i) => ({ src: img.src, alt: slides[i].alt }));
+
+const paragraphs = [
+	"A través de charlas interactivas, aprenderás a reconocer constelaciones, planetas y otros cuerpos celestes.",
+	"Observa el universo en detalle con telescopios de alta calidad y disfruta del Electronically Assisted Astronomy (EAA) para visualizar objetos profundos en tiempo real.",
+	"Además, captura la belleza del cosmos con sesiones de fotografía nocturna. Una experiencia única para conectar con el cielo estrellado.",
+];
 ---
 
-<section class="p-4">
-	<Card className="bg-blue-500">
-		<CardHeader className="text-center">
-			<CardTitle className="text-2xl"> Servicio Astronómico </CardTitle>
-			<CardTitle> Lyrae Astronomía </CardTitle>
-		</CardHeader>
-		<CardContent className="flex flex-row items-center justify-center gap-8">
-			<img src = { logo1.src } class="rounded-full w-24" />
-			<img src = { logo2.src } class="rounded-full border-3 border-green-500 w-24" />
-		</CardContent>
-		<CardContent className="flex flex-col md:flex-row items-center">
-			<article class="px-8 md:w-1/2">
-				<p>Descubre la majestuosidad del cielo nocturno con nuestras experiencias de astroturismo.</p>
-				<p>A través de charlas interactivas, aprenderás a reconocer constelaciones, planetas y otros cuerpos celestes.</p>
-				<p>Observa el universo en detalle con telescopios de alta calidad y disfruta del Electronically Assisted Astronomy (EAA) para visualizar objetos profundos en tiempo real.</p>
-				<p>Además, captura la belleza del cosmos con sesiones de fotografía nocturna. Una experiencia única para conectar con el cielo estrellado.</p>
-			</article>
-			<ImageCarousel
-				client:load
-				images={ introImgs }
-				className="py-8 mx-16 md:w-1/2"
-			/>
-		</CardContent>
-	</Card>
+<section id="inicio" class="px-5 pt-12 pb-16">
+	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">
+		<header class="flex flex-col items-center gap-6 text-center">
+			<div class="flex items-center gap-4">
+				<Image
+					src={logo1}
+					alt="Logo de Lyrae Astronomía"
+					class="size-20 rounded-full ring-1 ring-white/15"
+				/>
+				<Image
+					src={logo2}
+					alt="Logo de Turismo Entre Cordilleras"
+					class="size-20 rounded-full ring-1 ring-white/15"
+				/>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium tracking-[0.22em] text-primary uppercase">
+					Servicio Astronómico
+				</p>
+				<h1 class="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+					Lyrae Astronomía
+				</h1>
+				<p class="text-pretty text-base leading-relaxed text-muted-foreground">
+					Descubre la majestuosidad del cielo nocturno con nuestras experiencias de
+					astroturismo.
+				</p>
+			</div>
+
+			<a
+				href="https://wa.me/56988147137"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 font-medium text-primary-foreground transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+			>
+				<HugeiconsIcon icon={WhatsappIcon} size={20} />
+				Reservar una salida
+			</a>
+
+			{/* El servicio es solo para huéspedes del complejo. Va acá arriba, antes
+			    de que alguien recorra el sitio entero para enterarse al final. */}
+			<div class="w-full rounded-2xl bg-card p-4 text-left ring-1 ring-white/10">
+				<p class="text-sm leading-relaxed">
+					<span class="font-medium text-primary">¿Ya tienes tu reserva en Entre Cordilleras?</span
+					> Entonces esto es para ti: la salida se hace en el mismo complejo, a pasos de tu cabaña.
+				</p>
+				<p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+					Es un servicio exclusivo para huéspedes. Si todavía no tienes cabaña, parte por ahí.
+				</p>
+				<div class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+					<a
+						href="https://www.entrecordilleras.cl"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex min-h-11 items-center gap-1.5 text-primary underline underline-offset-4"
+					>
+						Reservar una cabaña
+						<HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+					</a>
+					<a
+						href="#contacto"
+						class="inline-flex min-h-11 items-center text-muted-foreground underline underline-offset-4 transition hover:text-foreground"
+					>
+						Contactar al complejo
+					</a>
+				</div>
+			</div>
+		</header>
+
+		<ImageCarousel client:visible images={introImgs} className="w-full" />
+
+		<div class="space-y-4 text-sm leading-relaxed text-muted-foreground">
+			{paragraphs.map((text) => <p>{text}</p>)}
+		</div>
+	</div>
 </section>

@@ -1,0 +1,55 @@
+name: Pronóstico de la noche
+
+# Una corrida diaria a las 17:00 UTC — 13:00 en el complejo, con holgura antes
+# del atardecer y ya con el run del modelo de las 12Z disponible. Los cron de
+# GitHub pueden atrasarse hasta media hora, por eso no se programa al filo.
+on:
+  schedule:
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+
+# El job commitea; necesita permiso de escritura sobre el repo.
+permissions:
+  contents: write
+
+# Si una corrida se atrasa y se topa con la siguiente, que espere en vez de
+# pelear por el mismo push.
+concurrency:
+  group: forecast
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # --ignore-scripts salta la compilación de sharp y esbuild: el script solo
+      # necesita suncalc y el runtime de Node.
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Consultar 7Timer y escribir el pronóstico
+        run: pnpm run forecast
+
+      - name: Commitear si el pronóstico cambió
+        run: |
+          if git diff --quiet -- src/data/forecast.json; then
+            echo "El pronóstico no cambió: no hay nada que desplegar."
+            exit 0
+          fi
+
+          noche=$(node -p "require('./src/data/forecast.json').night.date")
+          veredicto=$(node -p "require('./src/data/forecast.json').night.verdict")
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/forecast.json
+          git commit -m "datos: pronóstico de la noche del $noche ($veredicto)"
+          git push

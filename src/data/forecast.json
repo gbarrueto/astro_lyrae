@@ -1,0 +1,137 @@
+{
+	"generatedAt": "2026-07-29T00:46:45.270Z",
+	"model": {
+		"name": "7Timer! ASTRO",
+		"basis": "GFS",
+		"init": "2026072818",
+		"resolution": "3 horas"
+	},
+	"site": {
+		"lat": -37.643,
+		"lon": -71.695,
+		"timeZone": "America/Santiago"
+	},
+	"night": {
+		"date": "2026-07-28",
+		"sunset": "17:56",
+		"bookingDeadline": "15:56",
+		"darkFrom": "19:27",
+		"darkUntil": "06:18",
+		"sunrise": "07:49",
+		"moon": {
+			"illumination": 100,
+			"label": "luna llena",
+			"interference": "alta",
+			"rise": "17:04",
+			"set": "07:25"
+		},
+		"verdict": "malo",
+		"headline": "Cielo cubierto durante toda la noche.",
+		"segments": [
+			{
+				"label": "Anochecer",
+				"time": "20:00",
+				"at": "2026-07-29T00:00:00.000Z",
+				"clouds": {
+					"code": 9,
+					"range": "94–100 %",
+					"label": "cubierto",
+					"quality": "malo"
+				},
+				"seeing": {
+					"code": 3,
+					"range": "0,75–1\"",
+					"label": "bueno",
+					"quality": "bueno"
+				},
+				"transparency": {
+					"code": 8,
+					"label": "muy pobre",
+					"quality": "malo"
+				},
+				"obscured": true,
+				"temperature": 6,
+				"humidity": "95–100 %",
+				"precipitation": "snow"
+			},
+			{
+				"label": "Medianoche",
+				"time": "23:00",
+				"at": "2026-07-29T03:00:00.000Z",
+				"clouds": {
+					"code": 9,
+					"range": "94–100 %",
+					"label": "cubierto",
+					"quality": "malo"
+				},
+				"seeing": {
+					"code": 3,
+					"range": "0,75–1\"",
+					"label": "bueno",
+					"quality": "bueno"
+				},
+				"transparency": {
+					"code": 8,
+					"label": "muy pobre",
+					"quality": "malo"
+				},
+				"obscured": true,
+				"temperature": 5,
+				"humidity": "95–100 %",
+				"precipitation": "snow"
+			},
+			{
+				"label": "Madrugada",
+				"time": "02:00",
+				"at": "2026-07-29T06:00:00.000Z",
+				"clouds": {
+					"code": 9,
+					"range": "94–100 %",
+					"label": "cubierto",
+					"quality": "malo"
+				},
+				"seeing": {
+					"code": 3,
+					"range": "0,75–1\"",
+					"label": "bueno",
+					"quality": "bueno"
+				},
+				"transparency": {
+					"code": 8,
+					"label": "muy pobre",
+					"quality": "malo"
+				},
+				"obscured": true,
+				"temperature": 5,
+				"humidity": "95–100 %",
+				"precipitation": "snow"
+			},
+			{
+				"label": "Madrugada",
+				"time": "05:00",
+				"at": "2026-07-29T09:00:00.000Z",
+				"clouds": {
+					"code": 9,
+					"range": "94–100 %",
+					"label": "cubierto",
+					"quality": "malo"
+				},
+				"seeing": {
+					"code": 4,
+					"range": "1–1,25\"",
+					"label": "aceptable",
+					"quality": "regular"
+				},
+				"transparency": {
+					"code": 3,
+					"label": "buena",
+					"quality": "bueno"
+				},
+				"obscured": true,
+				"temperature": 6,
+				"humidity": "90–95 %",
+				"precipitation": null
+			}
+		]
+	}
+}

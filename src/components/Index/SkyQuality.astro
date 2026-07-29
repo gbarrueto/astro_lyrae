@@ -1,0 +1,54 @@
+---
+import { HugeiconsIcon } from "@hugeicons/react";
+import { LocationStar01Icon } from "@hugeicons/core-free-icons";
+import { sky } from "@/lib/services";
+
+// Bloque propio y no una línea dentro de "Deberías saber": la oscuridad del
+// cielo es lo que separa a este lugar de mirar desde el patio de la casa, y el
+// visitante que viaja a fotografiar decide con este dato. Va arriba, antes de
+// los servicios, porque también justifica el precio de lo que viene después.
+const stats = [sky.bortle, sky.sqm];
+---
+
+<section id="cielo" class="px-5 py-16">
+	<div class="mx-auto w-full max-w-2xl">
+		<header class="mb-8 space-y-3 text-center">
+			<p
+				class="inline-flex items-center gap-2 text-xs font-medium tracking-[0.22em] text-primary uppercase"
+			>
+				<HugeiconsIcon icon={LocationStar01Icon} size={16} />
+				El cielo de acá
+			</p>
+			<h2 class="font-heading text-3xl font-semibold tracking-tight text-balance">
+				Un cielo Bortle 2
+			</h2>
+			<p class="text-sm leading-relaxed text-muted-foreground">
+				Prácticamente sin contaminación lumínica: la Vía Láctea se ve proyectando sombra y a
+				simple vista se distinguen las Nubes de Magallanes. Es la clase de cielo que ya no
+				queda cerca de una ciudad.
+			</p>
+		</header>
+
+		<dl class="grid gap-4 sm:grid-cols-2">
+			{
+				stats.map((stat) => (
+					<div class="rounded-2xl bg-card p-5 text-center ring-1 ring-white/10">
+						<dt class="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+							{stat.label}
+						</dt>
+						<dd class="mt-2 font-heading text-3xl font-semibold tabular-nums text-primary">
+							{stat.value}
+						</dd>
+						<p class="mt-2 text-xs leading-relaxed text-balance text-muted-foreground">
+							{stat.note}
+						</p>
+					</div>
+				))
+			}
+		</dl>
+
+		<p class="mt-4 text-center text-xs text-muted-foreground">
+			Medición del sitio según {sky.source}.
+		</p>
+	</div>
+</section>
