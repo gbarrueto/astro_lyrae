@@ -142,6 +142,24 @@ pregunta práctica de quien sale dos horas a estar quieto de noche.
 
 ---
 
+## Barra superior
+
+### Dibujos definitivos de los iconos de cielo
+
+La composición por capas ya funciona y está enchufada, pero los 16 archivos de
+`src/assets/sky/` son placeholders geométricos hechos para verificar la lógica,
+no para mostrarlos en producción.
+
+Los dibujos vienen en camino. Lo que hay que respetar está en
+`docs/iconos-cielo.md`: nombres de archivo, lienzo de 24×24, hemisferio sur —la
+luna creciente se ilumina por la izquierda— y que las capas se apilan, así que
+las nubes van abajo y los cuerpos celestes arriba a la derecha.
+
+Reemplazar un archivo con el mismo nombre es todo lo que hay que hacer; no se
+toca código.
+
+---
+
 ## Herramientas
 
 ### Reemplazar el capturador del recorrido simulado
@@ -191,8 +209,14 @@ segmentación, no una falta.
   la barra muestra hora del complejo, temperatura, seeing e icono de cielo
   compuesto por capas. Faltan los dibujos definitivos — hoy hay placeholders
   geométricos en `src/assets/sky/`, ver `docs/iconos-cielo.md`.
-- Chips de hora del pronóstico sin estado visible *(fricción #5)*.
-- Cambios pensados para la tabla de pronóstico *(fricciones #1 y #6)*.
+- ~~Chips de hora del pronóstico sin estado visible~~ *(fricción #5)*. **Resuelto
+  por eliminación:** los seis botones se fueron junto con la tabla. El modelo
+  entrega un punto cada 3 horas, así que elegir una hora exacta prometía una
+  precisión que no existe.
+- ~~Cambios pensados para la tabla de pronóstico~~ *(fricciones #1 y #6)*.
+  **Hecho:** `NightForecast.astro` reemplaza el iframe de meteoblue por un
+  veredicto de la noche en lenguaje llano, con los tramos de 3 horas y el seeing
+  tachado cuando hay nubes.
 
 ---
 
