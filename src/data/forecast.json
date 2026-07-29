@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-07-29T01:41:58.961Z",
+	"generatedAt": "2026-07-29T02:51:02.278Z",
 	"model": {
 		"name": "7Timer! ASTRO",
 		"basis": "GFS",
@@ -15,6 +15,7 @@
 		"date": "2026-07-28",
 		"sunset": "17:56",
 		"bookingDeadline": "15:56",
+		"bookingDeadlineAt": "2026-07-28T19:56:59.244Z",
 		"darkFrom": "19:27",
 		"darkUntil": "06:18",
 		"sunrise": "07:49",
@@ -27,6 +28,7 @@
 		},
 		"verdict": "malo",
 		"headline": "Cielo cubierto durante toda la noche.",
+		"windWarning": null,
 		"segments": [
 			{
 				"label": "Anochecer",
@@ -51,6 +53,13 @@
 				},
 				"obscured": true,
 				"temperature": 6,
+				"wind": {
+					"code": 2,
+					"range": "0,3–3,4 m/s",
+					"label": "brisa suave",
+					"quality": "bueno",
+					"direction": "NO"
+				},
 				"humidity": "95–100 %",
 				"precipitation": "snow"
 			},
@@ -77,6 +86,13 @@
 				},
 				"obscured": true,
 				"temperature": 5,
+				"wind": {
+					"code": 2,
+					"range": "0,3–3,4 m/s",
+					"label": "brisa suave",
+					"quality": "bueno",
+					"direction": "NO"
+				},
 				"humidity": "95–100 %",
 				"precipitation": "snow"
 			},
@@ -103,34 +119,15 @@
 				},
 				"obscured": true,
 				"temperature": 5,
+				"wind": {
+					"code": 2,
+					"range": "0,3–3,4 m/s",
+					"label": "brisa suave",
+					"quality": "bueno",
+					"direction": "SE"
+				},
 				"humidity": "95–100 %",
 				"precipitation": "snow"
-			},
-			{
-				"label": "Madrugada",
-				"at": "2026-07-29T09:00:00.000Z",
-				"time": "05:00",
-				"clouds": {
-					"code": 9,
-					"range": "94–100 %",
-					"label": "cubierto",
-					"quality": "malo"
-				},
-				"seeing": {
-					"code": 4,
-					"range": "1–1,25\"",
-					"label": "aceptable",
-					"quality": "regular"
-				},
-				"transparency": {
-					"code": 3,
-					"label": "buena",
-					"quality": "bueno"
-				},
-				"obscured": true,
-				"temperature": 6,
-				"humidity": "90–95 %",
-				"precipitation": null
 			}
 		]
 	},
@@ -157,6 +154,13 @@
 			},
 			"obscured": true,
 			"temperature": 6,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "O"
+			},
 			"humidity": "100–100 %",
 			"precipitation": "snow"
 		},
@@ -182,6 +186,13 @@
 			},
 			"obscured": true,
 			"temperature": 6,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "NO"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
 		},
@@ -207,6 +218,13 @@
 			},
 			"obscured": true,
 			"temperature": 5,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "NO"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
 		},
@@ -232,6 +250,13 @@
 			},
 			"obscured": true,
 			"temperature": 5,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "SE"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
 		},
@@ -257,6 +282,13 @@
 			},
 			"obscured": true,
 			"temperature": 6,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "SE"
+			},
 			"humidity": "90–95 %",
 			"precipitation": null
 		},
@@ -282,6 +314,13 @@
 			},
 			"obscured": true,
 			"temperature": 5,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
 		},
@@ -307,6 +346,13 @@
 			},
 			"obscured": true,
 			"temperature": 6,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
 		},
@@ -332,6 +378,13 @@
 			},
 			"obscured": true,
 			"temperature": 9,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "rain"
 		},
@@ -357,6 +410,13 @@
 			},
 			"obscured": true,
 			"temperature": 9,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "rain"
 		},
@@ -382,6 +442,13 @@
 			},
 			"obscured": true,
 			"temperature": 9,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "rain"
 		},
@@ -407,6 +474,13 @@
 			},
 			"obscured": true,
 			"temperature": 9,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "rain"
 		},
@@ -432,6 +506,13 @@
 			},
 			"obscured": true,
 			"temperature": 9,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "rain"
 		},
@@ -457,6 +538,13 @@
 			},
 			"obscured": true,
 			"temperature": 8,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
 			"humidity": "85–90 %",
 			"precipitation": "rain"
 		},
@@ -482,6 +570,13 @@
 			},
 			"obscured": true,
 			"temperature": 9,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "NE"
+			},
 			"humidity": "85–90 %",
 			"precipitation": "rain"
 		},
@@ -507,6 +602,13 @@
 			},
 			"obscured": true,
 			"temperature": 13,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "viento moderado",
+				"quality": "bueno",
+				"direction": "N"
+			},
 			"humidity": "90–95 %",
 			"precipitation": "rain"
 		},
@@ -532,6 +634,13 @@
 			},
 			"obscured": true,
 			"temperature": 11,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "viento moderado",
+				"quality": "bueno",
+				"direction": "N"
+			},
 			"humidity": "95–100 %",
 			"precipitation": "rain"
 		}

@@ -84,6 +84,43 @@ const TRANSPARENCY = [
 	{ label: "muy pobre", quality: "malo" },
 ];
 
+/**
+ * wind10m.speed: 1–8, en la escala de 7Timer (no en m/s).
+ *
+ * Para exposiciones largas el viento decide tanto como las nubes —con ráfagas
+ * no hay trípode que aguante— y para el resto del grupo define cuánto hay que
+ * abrigarse. A diferencia del seeing, sigue siendo válido con cielo cubierto.
+ */
+const WIND = [
+	null,
+	{ range: "<0,3 m/s", label: "calma", quality: "bueno" },
+	{ range: "0,3–3,4 m/s", label: "brisa suave", quality: "bueno" },
+	{ range: "3,4–8 m/s", label: "viento moderado", quality: "bueno" },
+	{ range: "8–10,8 m/s", label: "viento fresco", quality: "regular" },
+	{ range: "10,8–17,2 m/s", label: "viento fuerte", quality: "malo" },
+	{ range: "17,2–24,5 m/s", label: "temporal", quality: "malo" },
+	{ range: "24,5–32,6 m/s", label: "tormenta", quality: "malo" },
+	{ range: ">32,6 m/s", label: "huracanado", quality: "malo" },
+];
+
+/** Las direcciones vienen en inglés ("NW"); acá se usan las nuestras. */
+const WIND_DIRECTION = {
+	N: "N",
+	NE: "NE",
+	E: "E",
+	SE: "SE",
+	S: "S",
+	SW: "SO",
+	W: "O",
+	NW: "NO",
+};
+
+function windScale(wind) {
+	const scaled = scale(WIND, wind?.speed);
+	if (!scaled) return null;
+	return { ...scaled, direction: WIND_DIRECTION[wind.direction] ?? wind.direction ?? null };
+}
+
 /** rh2m: −4…16, en tramos de 5 %. El 16 es el tope (100 %). */
 function humidityRange(code) {
 	if (typeof code !== "number") return null;
@@ -276,6 +313,21 @@ function verdictFor(segments) {
 	return RANK[scores[Math.floor(scores.length / 2)]];
 }
 
+/**
+ * El viento no entra en el veredicto —se puede observar con viento— pero sí
+ * arruina la fotografía de larga exposición y cambia cuánto hay que abrigarse,
+ * así que cuando aprieta va dicho aparte.
+ */
+function windWarningFor(segments) {
+	const windy = segments.filter((s) => s.wind && s.wind.quality === "malo");
+	if (windy.length === 0) return null;
+
+	const worst = windy.reduce((a, b) => (b.wind.code > a.wind.code ? b : a));
+	const when = windy.length === segments.length ? "toda la noche" : `cerca de las ${worst.time}`;
+
+	return `Se espera ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
+}
+
 function headlineFor(verdict, segments, moon) {
 	const clear = segments.filter((s) => s.clouds.quality === "bueno");
 
@@ -357,6 +409,7 @@ async function main() {
 			 */
 			obscured: clouds?.quality === "malo",
 			temperature: point.temp2m,
+			wind: windScale(point.wind10m),
 			humidity: humidityRange(point.rh2m),
 			precipitation: point.prec_type === "none" ? null : point.prec_type,
 			_at: at,
@@ -372,8 +425,14 @@ async function main() {
 		.map(({ _at, ...rest }) => rest);
 
 	// La ventana observable es la que arma el bloque del pronóstico.
+	//
+	// Se muestran los tres primeros tramos y no la noche completa: una salida
+	// dura unas dos horas y arranca al anochecer, así que con nueve horas desde
+	// el crepúsculo sobra. En invierno la noche da para un cuarto punto, pero cae
+	// casi al amanecer y nadie decide nada con él.
 	const segments = points
 		.filter((p) => p._at >= window.darkFrom && p._at <= window.darkUntil)
+		.slice(0, 3)
 		.map(({ _at, ...rest }) => ({ label: segmentLabel(localHour(_at)), ...rest }));
 
 	const moon = moonReport(window);
@@ -397,12 +456,15 @@ async function main() {
 			 * alguien ya hizo la resta: nadie sabe de memoria cuándo atardece.
 			 */
 			bookingDeadline: localTime(new Date(window.sunset.getTime() - 2 * 3600e3)),
+			/** El mismo plazo como instante absoluto, para comparar en el cliente. */
+			bookingDeadlineAt: new Date(window.sunset.getTime() - 2 * 3600e3).toISOString(),
 			darkFrom: localTime(window.darkFrom),
 			darkUntil: localTime(window.darkUntil),
 			sunrise: localTime(window.sunrise),
 			moon,
 			verdict,
 			headline: headlineFor(verdict, segments, moon),
+			windWarning: windWarningFor(segments),
 			segments,
 		},
 		/** Serie continua para la barra superior: condiciones a cualquier hora. */
