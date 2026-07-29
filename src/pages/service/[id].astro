@@ -9,6 +9,7 @@ import {
 	UserGroupIcon,
 	Alert01Icon,
 	CreditCardIcon,
+	Coins01Icon,
 	Home01Icon,
 } from "@hugeicons/core-free-icons";
 import Layout from "@/layouts/Layout.astro";
@@ -16,14 +17,14 @@ import Navbar from "@/components/Navbar/navbar.astro";
 import {
 	services,
 	serviceIds,
-	mainPrice,
+	priceSummary,
 	getSeason,
 	getTargets,
 	booking,
 	type ServiceId,
 	type ExperienceStep,
 	type GalleryItem,
-	type PriceTier,
+	type Pricing,
 } from "@/lib/services";
 
 export function getStaticPaths() {
@@ -48,7 +49,8 @@ const experience: ExperienceStep[] = service.experience;
 const caveat = "caveat" in service ? service.caveat : null;
 const gallery: GalleryItem[] = "gallery" in service ? service.gallery : [];
 const imagePosition = "imagePosition" in service ? service.imagePosition : undefined;
-const price: PriceTier[] | null = service.price;
+const price: Pricing | null = service.price;
+const priceHeadline = priceSummary(service);
 
 // La sesión de fotos se suma a cualquier salida; desde su propia ficha no hay
 // nada que ofrecer, así que el cruce solo aparece en las otras dos.
@@ -59,7 +61,7 @@ const photoAddOn = id === "fotografia-nocturna" ? null : services["fotografia-no
 // los otros dos —con precio— resuelve la comparación en el mismo lugar.
 const otherServices = serviceIds
 	.filter((other) => other !== id)
-	.map((other) => ({ id: other, ...services[other], tier: mainPrice(services[other]) }));
+	.map((other) => ({ id: other, ...services[other], tier: priceSummary(services[other]) }));
 ---
 
 <Layout title={`${service.title} — Lyrae Astronomía`} description={service.description}>
@@ -249,6 +251,51 @@ const otherServices = serviceIds
 			<section class="mt-14">
 				<h2 class="font-heading text-2xl font-semibold tracking-tight">Antes de reservar</h2>
 				<ul class="mt-6 grid gap-4 sm:grid-cols-2">
+					{/* La tarifa va primero: es lo que más se busca, y desde que dejó de
+					    ser un número por persona necesita el desglose completo en algún
+					    lado. Cada renglón es monto + a qué corresponde, y envuelve por
+					    separado para que el monto nunca se parta del texto que lo
+					    explica. */}
+					<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+						<span
+							class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
+						>
+							<HugeiconsIcon icon={Coins01Icon} size={22} />
+						</span>
+						<div class="min-w-0">
+							<h3 class="font-heading text-base font-medium">Cuánto vale</h3>
+							{
+								price ? (
+									<>
+										<ul class="mt-2 space-y-1">
+											<li class="flex flex-wrap items-baseline gap-x-2 text-sm">
+												<span class="font-heading font-semibold whitespace-nowrap">
+													{price.headline.amount}
+												</span>
+												<span class="text-muted-foreground">{price.headline.note}</span>
+											</li>
+											{price.tiers?.map((tier) => (
+												<li class="flex flex-wrap items-baseline gap-x-2 text-sm">
+													<span class="font-medium whitespace-nowrap">{tier.amount}</span>
+													<span class="text-muted-foreground">{tier.note}</span>
+												</li>
+											))}
+										</ul>
+										{price.note && (
+											<p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+												{price.note}
+											</p>
+										)}
+									</>
+								) : (
+									<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+										Escríbenos y te decimos el valor según cuántos vayan.
+									</p>
+								)
+							}
+						</div>
+					</li>
+
 					<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
 						<span
 							class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
@@ -368,6 +415,11 @@ const otherServices = serviceIds
 											<span class="font-medium whitespace-nowrap">
 												{other.tier ? (
 													<>
+														{other.tier.from && (
+															<span class="mr-1 text-xs font-normal text-muted-foreground">
+																desde
+															</span>
+														)}
 														{other.tier.amount}
 														<span class="ml-1 text-xs font-normal text-muted-foreground">
 															{other.tier.note}
@@ -377,8 +429,11 @@ const otherServices = serviceIds
 													"Consúltanos"
 												)}
 											</span>
+											{/* Sin separador escrito: cuando el renglón se parte, un "·" al
+											    inicio de la segunda línea queda colgando. El `gap-x-2` del
+											    contenedor ya separa lo suficiente. */}
 											<span class="text-xs text-muted-foreground tabular-nums">
-												· {other.duration}
+												{other.duration}
 											</span>
 										</p>
 									</div>
@@ -407,16 +462,18 @@ const otherServices = serviceIds
 					{service.duration} · pagas al terminar
 				</p>
 				{
-					price ? (
-						/* Cada tramo es indivisible: si no caben lado a lado se apilan
-						   enteros, en vez de partirse dejando el separador colgando. */
-						<p class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 font-heading text-base leading-snug font-semibold sm:text-lg">
-							{price.map((tier) => (
-								<span class="whitespace-nowrap">
-									{tier.amount}
-									<span class="ml-1 text-xs font-normal text-muted-foreground">{tier.note}</span>
-								</span>
-							))}
+					/* Solo el titular: la barra comparte el renglón con el botón y el
+					   desglose no cabe sin empujarla a tres líneas. El detalle está en
+					   "Cuánto vale", que es donde alguien lo lee. */
+					priceHeadline ? (
+						<p class="font-heading text-base leading-snug font-semibold sm:text-lg">
+							{priceHeadline.from && (
+								<span class="mr-1 text-xs font-normal text-muted-foreground">desde</span>
+							)}
+							{priceHeadline.amount}
+							<span class="ml-1 text-xs font-normal text-muted-foreground">
+								{priceHeadline.note}
+							</span>
 						</p>
 					) : (
 						<p class="font-heading text-base leading-snug font-semibold sm:text-lg">Consúltanos</p>

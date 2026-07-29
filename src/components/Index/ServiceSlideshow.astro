@@ -1,14 +1,14 @@
 ---
 import { Image } from "astro:assets";
-import { services, serviceIds, mainPrice } from "@/lib/services";
+import { services, serviceIds, priceSummary } from "@/lib/services";
 
 // Los datos viven en lib/services: así la tarjeta y la ficha del servicio
 // siempre cuentan lo mismo.
 //
-// En la tarjeta va solo el tramo principal de la tarifa: la observación visual
-// tiene dos tramos y el renglón se parte en móvil. El detalle completo está en
-// la ficha, para quien entre.
-const cards = serviceIds.map((id) => ({ id, ...services[id], tier: mainPrice(services[id]) }));
+// En la tarjeta va solo el titular de la tarifa, con "desde" cuando hay tramos
+// detrás: el renglón comparte ancho con la duración y el desglose no cabe. El
+// detalle completo está en la ficha, para quien entre.
+const cards = serviceIds.map((id) => ({ id, ...services[id], tier: priceSummary(services[id]) }));
 ---
 
 <section id="servicios" class="px-5 py-16">
@@ -38,10 +38,20 @@ const cards = serviceIds.map((id) => ({ id, ...services[id], tier: mainPrice(ser
 								<h3 class="font-heading text-lg font-medium">{service.cardTitle}</h3>
 								<p class="text-sm leading-relaxed text-muted-foreground">{service.tagline}</p>
 								<div class="mt-auto pt-3">
-									<div class="flex items-baseline justify-between gap-3 border-t border-white/10 pt-3">
+									{/* `flex-wrap` es la red de seguridad: si el precio y la duración no
+									    caben juntos, la duración baja de línea en vez de desbordar. El
+									    precio en sí no se parte nunca. */}
+									<div
+										class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-t border-white/10 pt-3"
+									>
 										<p class="font-heading text-base leading-snug font-semibold whitespace-nowrap">
 											{service.tier ? (
 												<>
+													{service.tier.from && (
+														<span class="mr-1 text-xs font-normal text-muted-foreground">
+															desde
+														</span>
+													)}
 													{service.tier.amount}
 													<span class="ml-1 text-xs font-normal text-muted-foreground">
 														{service.tier.note}

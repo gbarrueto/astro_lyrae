@@ -25,8 +25,15 @@ supuestos para llegar ahí.
   precio.
 - **La subvaloración no es generosidad, es deuda.** Se paga con noches en que el
   operador no quiere salir, o con el servicio desapareciendo del catálogo.
+- **Y sin embargo: el contrapeso pesa igual.** Un precio que el cliente no puede
+  pagar no es un precio digno, es un servicio que no existe. Este es un negocio
+  **complementario, informal y estacional**, para gente de la zona en una
+  escapada de fin de semana, no un producto turístico autónomo. **Recomendar
+  tarifas de operador instalado a un negocio que no lo es fue el error concreto
+  que motivó reescribir esta skill.**
 - **Di cuando algo está mal.** Si el precio actual está bajo, dilo con el número
-  que corresponde y cuánto se está regalando por salida. Si está alto, también.
+  que corresponde y cuánto se está regalando por salida. Si está alto, también —
+  y estar alto es un error tan grave como estar bajo.
 
 ## Antes de responder
 
@@ -43,10 +50,27 @@ Lee siempre, en este orden:
 4. `referencias/mercado.md` — anclas de precio del mercado chileno y cómo
    tratarlas.
 
-Si falta un dato que cambia el resultado (costo del equipo, cuántas salidas al
-mes, si el operador cobra su tiempo), **pregunta como máximo tres cosas** y
+### Las tres preguntas
+
+Si falta un dato que cambia el resultado, **pregunta como máximo tres cosas** y
 sigue con supuestos declarados para todo lo demás. No bloquees la respuesta
 esperando datos.
+
+Salvo que ya lo sepas de la conversación, estas tres son casi siempre las
+correctas, en este orden de importancia:
+
+1. **¿El equipo se compró para operar, o ya existía como hobby?** Si es capital
+   hundido, **no se amortiza** — se reemplaza por un fondo de reparación de
+   ~$2.000 por salida. Es la pregunta que más mueve el número y la que es más
+   tentador dar por supuesta.
+2. **¿Cuánto vale una noche de cabaña hoy?** Es el ancla del techo. Sin ese
+   número no hay recomendación posible.
+3. **¿En cuánto valora el operador su hora, y con qué dedicación opera?**
+   (tiempo completo, estacional, esporádico). Ajusta el piso y el tono de toda
+   la recomendación.
+
+Cuántas salidas al mes es la cuarta en importancia: solo cambia el resultado si
+además hay que amortizar.
 
 ## Método
 
@@ -54,15 +78,21 @@ Detalle completo en `referencias/metodo.md`. En resumen, todo número se
 construye con cuatro lentes y ninguna se salta:
 
 1. **Piso** — qué cuesta entregar una salida: horas reales de operador (armado,
-   alineación, sesión, desarme), amortización del equipo, energía, y el costo de
-   oportunidad de trabajar de noche.
+   alineación, sesión, desarme), energía, el costo de oportunidad de trabajar de
+   noche, y amortización del equipo **solo si el equipo se compró para operar**.
 2. **Valor** — qué recibe el cliente: calidad del cielo, calidad y escasez del
    equipo, exclusividad del grupo, entregables que se lleva, cero fricción.
-3. **Techo** — cuánto está dispuesto a pagar un huésped que ya pagó la cabaña,
-   comparado con lo que pagaría por lo mismo en Elqui o Atacama **más el
-   traslado**, y con la tinaja gratis a treinta metros.
+3. **Techo** — **el ancla es la noche de cabaña ($50.000–$70.000)**, no lo que
+   cuesta un tour en Elqui o Atacama. Un add-on que se decide sin conversarlo
+   vive entre el 20% y el 40% de una noche; uno que cuesta una noche entera se
+   rechaza solo. Y compite con una tinaja gratis a treinta metros.
 4. **Coherencia** — que los precios entre servicios cuenten la historia
    correcta. Esta es la lente que más se olvida y la que más daño hace.
+
+**Orden de operaciones:** el piso y el valor proponen; **el techo manda**. Si el
+piso queda por encima del techo, la conclusión no es subir el precio: es que el
+servicio, a ese costo, no cabe en este mercado — y hay que bajar el costo
+(menos horas, sesión más corta) o aceptar explícitamente un margen flaco.
 
 ## Reglas duras del rubro
 
@@ -95,6 +125,14 @@ Aplícalas siempre; son las que separan una tarifa que funciona de una que no.
   si no se alcanza a observar no pagas nada", el precio de las noches buenas
   tiene que cubrir las noches que se nublaron después del armado. Súbelo por el
   porcentaje de salidas frustradas esperado.
+- **La prueba del sueldo mínimo, en el caso más frecuente.** Divide lo que se
+  recauda por las horas reales de esa salida. El escenario que manda es el
+  **modal** —normalmente la pareja, no el grupo de ocho— y el resultado no puede
+  quedar bajo el mínimo por hora. Una tarifa puede verse sana en el grupo grande
+  y estar rota donde de verdad se usa.
+- **La prueba de la noche de cabaña.** Antes de decir un número en voz alta,
+  divídelo por el valor de una noche. Si pasa de la mitad, revísalo; si se acerca
+  a una noche entera, está mal, sin importar lo que digan el piso y el valor.
 
 ## Formato de salida
 
@@ -108,12 +146,14 @@ número concreto, y el total para una pareja. El número va primero, la
 justificación después.
 
 **Por qué ese número** — un párrafo corto por servicio, atado a las cuatro
-lentes. Muestra la aritmética del piso al menos una vez: horas × valor hora +
-amortización, y cuánto queda por salida al precio recomendado.
+lentes. Muestra la aritmética del piso al menos una vez, y **siempre** el
+porcentaje que representa respecto de una noche de cabaña.
 
-**Cómo se ve la boleta** — tres escenarios reales: pareja, familia de 4 (2+2), y
-grupo de 8. Total a pagar y qué le queda al operador en cada uno. Acá es donde
-se ven los errores de estructura.
+**Cómo se ve la boleta** — cuatro escenarios: pareja, familia de 4 (2+2), cabaña
+llena (5), y grupo de 8. Para cada uno: total a pagar, horas de trabajo y
+**cuánto queda por hora para el operador**. Esa última columna es obligatoria —
+es la que delata los errores de estructura y la que hace la recomendación
+discutible en términos concretos.
 
 **Qué cambiaría el número** — condiciones concretas: si sube el costo del
 equipo, si se abre a externos, si se agrega un entregable, si bajan las salidas

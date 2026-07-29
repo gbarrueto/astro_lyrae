@@ -135,10 +135,30 @@ export type Equipment = {
 
 /**
  * Un tramo de la tarifa. Se guardan por separado —y no como una sola frase—
- * porque en móvil el renglón se parte: escrito "$5.000 adultos · $2.000 niños"
- * el separador termina colgando al inicio de la segunda línea.
+ * porque en móvil el renglón se parte: escrito "$15.000 por salida + $5.000 por
+ * adulto" el separador termina colgando al inicio de la segunda línea.
  */
 export type PriceTier = { amount: string; note: string };
+
+/**
+ * Tarifa de un servicio.
+ *
+ * `headline` es lo único que cabe donde el ancho es fijo —la barra de la ficha
+ * y las tarjetas de portada, que además llevan la duración al lado—, así que
+ * tiene que sostenerse solo: monto corto y nota de dos o tres palabras. El
+ * desglose completo vive en el bloque "Cuánto vale" de la ficha, que es donde
+ * alguien lo lee de verdad.
+ *
+ * Con `tiers` presente el titular se muestra como "desde $X". Los tramos pueden
+ * sumarse al titular (personas adicionales) o ser una modalidad más cara que él
+ * (la sesión de fotos por su cuenta); en ambos casos "desde" dice la verdad.
+ */
+export type Pricing = {
+	headline: PriceTier;
+	tiers?: PriceTier[];
+	/** Qué cubre el titular y a quién, en prosa. Va bajo el desglose. */
+	note?: string;
+};
 
 /** Imagen de apoyo dentro de la ficha: lo que el cliente se lleva. */
 export type GalleryItem = {
@@ -177,8 +197,8 @@ export type Service = {
 	/** Restricción que el cliente necesita saber antes de escribir. */
 	caveat?: string;
 	equipment: Equipment[];
-	/** Tarifa por tramos. Sin definir aún, la página muestra "Consúltanos". */
-	price: PriceTier[] | null;
+	/** Tarifa del servicio. Sin definir aún, la página muestra "Consúltanos". */
+	price: Pricing | null;
 };
 
 export const services = {
@@ -195,10 +215,14 @@ export const services = {
 		targetsTitle: "Qué podrás observar",
 		targetsNote:
 			"La visibilidad de algunos objetivos puede variar según la fecha. Confirmar durante la reserva.",
-		price: [
-			{ amount: "$5.000", note: "adultos" },
-			{ amount: "$2.000", note: "niños" },
-		],
+		price: {
+			headline: { amount: "$15.000", note: "por salida" },
+			tiers: [
+				{ amount: "+ $5.000", note: "por adulto adicional" },
+				{ amount: "+ $2.500", note: "por niño adicional" },
+			],
+			note: "El valor por salida cubre hasta 2 personas. Niños, hasta los 12 años.",
+		},
 		duration: "≈ 2 horas",
 		experience: [
 			{
@@ -304,7 +328,14 @@ export const services = {
 		targetsTitle: "Objetivos que alcanzaremos",
 		targetsNote:
 			"La cámara permite llegar a objetos que no son visibles a simple vista por el ocular. La visibilidad puede variar según la fecha.",
-		price: [{ amount: "$5.000", note: "por persona" }],
+		price: {
+			headline: { amount: "$20.000", note: "por salida" },
+			tiers: [
+				{ amount: "+ $4.500", note: "por adulto adicional" },
+				{ amount: "+ $2.500", note: "por niño adicional" },
+			],
+			note: "El valor por salida cubre hasta 2 personas. Niños, hasta los 12 años.",
+		},
 		duration: "≈ 2 horas",
 		experience: [
 			{
@@ -385,8 +416,18 @@ export const services = {
 		targetsTitle: "Qué retrataremos",
 		targetsNote:
 			"Objetos de campo amplio, los que caben junto al paisaje en una sola toma. También puedes traer tu propia cámara o celular: te acompañamos con la configuración.",
-		price: [{ amount: "$10.000", note: "la sesión" }],
-		duration: "15 – 20 minutos",
+		price: {
+			// El titular tiene que ser el monto más bajo para que "desde" no mienta,
+			// y la nota tiene que ser corta: esta tarjeta es la única con una
+			// duración larga ("15 – 20 minutos") compartiendo el renglón.
+			headline: { amount: "$12.000", note: "por sesión" },
+			tiers: [{ amount: "$18.000", note: "si va sola esa noche" }],
+			note: "Son $12.000 cuando la sumas a la Observación Visual o al EAA la misma noche.",
+		},
+		// Abreviado: la duración comparte renglón con el precio en la tarjeta, la
+		// barra fija y el bloque de cierre, y "minutos" entero era lo único que
+		// obligaba a partir la línea.
+		duration: "15 – 20 min",
 		experience: [
 			{
 				name: "Sesión de fotos",
@@ -435,10 +476,15 @@ export type ServiceId = keyof typeof services;
 
 export const serviceIds = Object.keys(services) as ServiceId[];
 
+/** Titular de la tarifa más el aviso de que hay tramos detrás. */
+export type PriceSummary = PriceTier & { from: boolean };
+
 /**
- * Tramo que representa la tarifa donde no cabe entera: tarjetas de portada y
- * bloques de cierre. El resto de los tramos se ven en la ficha.
+ * Lo que se muestra donde no cabe la tarifa entera: tarjetas de portada, barra
+ * fija y bloque de cierre. El desglose se ve en la ficha.
  */
-export function mainPrice(service: Service): PriceTier | null {
-	return service.price?.[0] ?? null;
+export function priceSummary(service: Service): PriceSummary | null {
+	if (!service.price) return null;
+	const { headline, tiers } = service.price;
+	return { ...headline, from: (tiers?.length ?? 0) > 0 };
 }
