@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 
 import {
 	QUALITY_TONE,
@@ -133,7 +135,7 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 					<PopoverTrigger
 						render={
 							<Button
-								variant="secondary"
+								variant="outline"
 								size="sm"
 								// El radio casi recto lo distingue del resto de la interfaz,
 								// que es toda de esquinas redondeadas.
@@ -144,21 +146,22 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 					>
 						<span
 							className={cn(
-								"size-1.5 rounded-full bg-current",
-								QUALITY_TONE[seeing.quality],
-								// Con el cielo cubierto el dato no aplica: el punto queda
-								// encendido a media luz, sin perder su color.
-								obscured && "opacity-40",
+								"size-2 rounded-full bg-current",
+								// El color solo tiene sentido si el dato aplica: con el cielo
+								// cubierto el punto se apaga, igual que el valor se tacha.
+								obscured ? "text-muted-foreground/40" : QUALITY_TONE[seeing.quality],
 							)}
 						/>
+						<span className="text-xs font-medium">Seeing</span>
 						<span
 							className={cn(
 								"text-xs tabular-nums",
-								obscured && "line-through opacity-60",
+								obscured ? "text-muted-foreground line-through" : "text-muted-foreground",
 							)}
 						>
 							{seeing.range}
 						</span>
+						<HugeiconsIcon icon={InformationCircleIcon} data-icon="inline-end" />
 					</PopoverTrigger>
 
 					<PopoverContent align="end" className="w-72">

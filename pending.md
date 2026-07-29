@@ -178,6 +178,39 @@ toca código.
 
 ---
 
+## Interfaz
+
+### Sacarle provecho a shadcn
+
+El proyecto tiene shadcn configurado (base-ui, estilo `maia`, iconos hugeicons)
+y hasta ahora solo usa `button`, `card`, `carousel`, `aspect-ratio` y `popover`.
+Buena parte de la interfaz son `div` con `ring-1` y `rounded-2xl` escritos a
+mano, que es justo lo que los componentes ya resuelven —y con estados de foco y
+accesibilidad incluidos.
+
+Ordenado por lo que más rinde:
+
+1. **`Accordion` en "Deberías saber"** (`GoodToKnow.astro`). Hoy son tres
+   tarjetas siempre abiertas que suman bastante scroll en móvil. Plegadas, el
+   visitante escanea los tres títulos y abre el que le interesa.
+2. **`Alert` para los avisos.** El bloque de exclusividad en `Intro.astro`, el
+   `windWarning` y la nota de "seeing tachado" en `NightForecast.astro` son
+   todos `div` estilizados a mano.
+3. **`Badge` para los chips.** Los objetivos observables (`Nebulosa Carina`,
+   `47 Tucanae`) y el chip del veredicto de la noche son spans con clases.
+4. **`Separator`** en vez de los `border-t` repartidos por las tarjetas.
+5. **`Tooltip` o `Popover` en el resto de los términos técnicos.** El seeing ya
+   lo tiene en la barra; transparencia, apertura y relación focal siguen sin
+   explicación en el punto donde aparecen.
+
+Discutible y por eso al final: **`Tabs` en la ficha de servicio** para separar
+experiencia / equipamiento / antes de reservar. Acortaría mucho la página, pero
+esconde contenido que hoy se encuentra bajando, y en los recorridos simulados el
+aficionado avanzado sí leía el equipamiento completo. No hacerlo sin evaluarlo
+antes.
+
+---
+
 ## Herramientas
 
 ### Reemplazar el capturador del recorrido simulado
@@ -240,7 +273,26 @@ segmentación, no una falta.
 
 ## Decisiones abiertas
 
-### Tarifa del EAA
+### Tarifa del EAA ✅
+
+> **Resuelto.** Los tres servicios pasaron de tarifa por persona a **mínimo por
+> salida (hasta 2 personas) + adicional por persona**: Observación Visual
+> $15.000 +$5.000/adulto +$2.500/niño; EAA $20.000 +$4.500/adulto
+> +$2.500/niño; Fotografía $12.000 sumada a otra salida, $18.000 sola.
+>
+> El error de fondo no era el nivel sino la estructura: cobrar por cabeza un
+> servicio cuyo costo es por salida dejaba al operador bajo el sueldo mínimo con
+> una pareja —el caso más frecuente— y cobraba $32.000 a una familia de 4 por un
+> EAA que no cuesta un peso más de operar. El nivel se ancló en la **noche de
+> cabaña** ($50.000–$70.000): cada tarifa queda entre el 20% y el 40% de una
+> noche.
+>
+> Dos supuestos que sostienen estos números y conviene no perder: el equipo es
+> **capital hundido** (compra de hobby, no se amortiza) y el operador trabaja
+> **estacionalmente**. Si alguna vez hay que pasar la batuta a alguien que deba
+> comprar equipo, estos precios no le sirven.
+>
+> Método y anclas en `.claude/skills/asesor-tarifas/`.
 
 El EAA quedó a `$5.000 por persona`, el mismo valor que el tramo adulto de la
 Observación Visual. La duda: el EAA implica bastante más trabajo de armado y

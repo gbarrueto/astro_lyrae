@@ -10,11 +10,18 @@ const sky = forecast.sky as SkyEvent[];
 <header
 	class="sticky top-0 z-50 border-b border-white/10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
 >
-	{/* client:idle: el reloj importa, pero no tanto como que la página aparezca.
-	    El HTML llega renderizado desde el build; hasta que hidrata se ve "--:--",
-	    nunca una hora falsa. La marca viaja como children para que el layout de
-	    tres zonas viva en un solo lugar. */}
-	<SkyStatus client:idle series={series} sky={sky} timeZone={forecast.site.timeZone}>
+	{/* client:load y no `idle`: la barra está sobre el pliegue y muestra "--:--"
+	    hasta que hidrata, que es justo el placeholder que hacía ver el sitio a
+	    medio hacer. El componente es chico y `idle` solo retrasaría eso.
+
+	    La marca viaja como children para que el layout de tres zonas viva en un
+	    solo lugar. */}
+	<SkyStatus
+		client:load
+		series={series}
+		sky={sky}
+		timeZone={forecast.site.timeZone}
+	>
 		<a href="/#inicio" class="font-heading text-sm font-semibold tracking-tight">
 			Lyrae<span class="text-primary">.</span>
 		</a>
