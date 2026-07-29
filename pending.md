@@ -95,6 +95,53 @@ Por qué así y no lo otro:
 
 ---
 
+## Pronóstico
+
+### Avisar cuando la hora de aviso ya pasó
+
+*(fricción #1 del recorrido de visitante, semilla 593281)*
+
+`night.bookingDeadline` se muestra como dato fijo: "Para salir esta noche,
+avísanos antes de las 15:56". La visitante llegó a esa línea a las 16:00 —se le
+había pasado por cuatro minutos— y **la página no se lo dijo**: tuvo que mirar
+la hora en su celular y darse cuenta sola. Esa noche era la única que le
+quedaba.
+
+El sitio es estático y `forecast.json` se genera una vez al día, así que la
+comparación con "ahora" solo puede ocurrir en el cliente: una isla mínima (o un
+script inline) que compare `bookingDeadline` con el reloj del visitante y
+cambie el mensaje.
+
+**Importante: cuando el plazo ya pasó, no cerrar la puerta.** El plazo son dos
+horas antes del atardecer para alcanzar a armar y alinear, pero se pueden hacer
+excepciones y dar por perdida la noche por sistema es perder un cliente que
+estaba dispuesto. El mensaje debería reconocer que ya es tarde y aun así
+invitar a escribir, algo en la línea de: *"La hora recomendada para avisar era
+las 15:56. Escríbenos igual y vemos si alcanzamos a preparar el equipo."*
+
+- Ojo con la zona horaria: el reloj del visitante puede no ser el de Chile
+  (alguien planificando desde otro país). Comparar contra la hora del complejo,
+  no contra la local del dispositivo.
+- Ojo también con el pronóstico vencido: si `night.date` ya no es hoy —porque
+  el cron falló— el bloque no debería afirmar nada sobre "esta noche".
+
+### Viento en el pronóstico
+
+*(fricción #4 del mismo recorrido)*
+
+7Timer ya devuelve `wind10m` (`direction` y `speed`) en cada punto y
+`scripts/forecast.mjs` lo descarta. Para fotografía de larga exposición el
+viento decide tanto como las nubes —con ráfagas no hay trípode que aguante— y
+para el resto del grupo es lo que define cuánto hay que abrigarse, que es la
+pregunta práctica de quien sale dos horas a estar quieto de noche.
+
+- `speed` viene como escala 1–8, no en m/s: traducirla con la tabla de la
+  documentación de 7Timer, sin inventar los cortes.
+- Igual que el seeing, el viento **no** se tacha con cielo cubierto: sigue
+  siendo válido para decidir el abrigo.
+
+---
+
 ## Herramientas
 
 ### Reemplazar el capturador del recorrido simulado
@@ -118,6 +165,23 @@ Evaluar un driver real (Playwright o Puppeteer contra Chromium en WSL) que
 permita al recorrido **interactuar**: tocar, hacer scroll horizontal dentro de
 un contenedor, esperar hidratación, y capturar solo cuando el estado importa.
 Debería además bajar bastante el tiempo por página.
+
+---
+
+## Descartadas (no volver a reportarlas)
+
+- **"No hay oferta para quien trae su propio equipo"** *(semilla 593281)*. El
+  servicio de fotografía nocturna es, a propósito, para quien no sabe y quiere
+  un recuerdo sin tocar nada. Quien quiere fotografiar por su cuenta le
+  pregunta al anfitrión de TEC: es una conversación, no un producto del sitio.
+- **"El lente 28–70 f/3.5–5.6 es lento para Vía Láctea"** *(semilla 593281)*.
+  Cierto y también irrelevante: el cliente de ese servicio no lee relaciones
+  focales, y el único que las lee ya trae su propia cámara y no lo va a
+  contratar. Ningún cliente deja de tomar el servicio por eso.
+
+Ambas son el mismo sesgo: juzgar el catálogo desde el perfil del visitante en
+vez de juzgar la experiencia del sitio. Un servicio que no es para alguien es
+segmentación, no una falta.
 
 ---
 
