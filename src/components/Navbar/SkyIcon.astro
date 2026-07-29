@@ -1,0 +1,47 @@
+---
+/**
+ * Apila las capas del icono de cielo.
+ *
+ * Las 16 capas se emiten inline y ocultas: el script de la barra enciende las
+ * que tocan según la hora, sin pedir nada al servidor ni recargar imágenes.
+ * Los archivos viven en `src/assets/sky/` — ver `docs/iconos-cielo.md`.
+ */
+const files = import.meta.glob("../../assets/sky/*.svg", {
+	query: "?raw",
+	import: "default",
+	eager: true,
+}) as Record<string, string>;
+
+const layers = Object.entries(files).map(([path, svg]) => ({
+	name: path.split("/").pop()!.replace(".svg", ""),
+	svg,
+}));
+
+interface Props {
+	/** Capas activas en el primer render; el cliente las corrige al cargar. */
+	active?: string[];
+	label?: string;
+	class?: string;
+}
+
+const { active = [], label = "", class: className = "" } = Astro.props;
+---
+
+<span
+	class:list={["relative inline-block size-6 shrink-0 text-primary", className]}
+	data-sky-icon
+	title={label}
+	role="img"
+	aria-label={label}
+>
+	{
+		layers.map((layer) => (
+			<span
+				class="absolute inset-0 [&>svg]:size-full"
+				data-layer={layer.name}
+				hidden={!active.includes(layer.name)}
+				set:html={layer.svg}
+			/>
+		))
+	}
+</span>

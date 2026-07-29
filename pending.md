@@ -187,7 +187,10 @@ segmentación, no una falta.
 
 ## En curso (no requieren nota, anotados para no re-reportarlos)
 
-- Indicador `Seeing --  --:--` de la barra superior *(fricción #3)*.
+- ~~Indicador `Seeing --  --:--` de la barra superior~~ *(fricción #3)*. **Hecho:**
+  la barra muestra hora del complejo, temperatura, seeing e icono de cielo
+  compuesto por capas. Faltan los dibujos definitivos — hoy hay placeholders
+  geométricos en `src/assets/sky/`, ver `docs/iconos-cielo.md`.
 - Chips de hora del pronóstico sin estado visible *(fricción #5)*.
 - Cambios pensados para la tabla de pronóstico *(fricciones #1 y #6)*.
 
