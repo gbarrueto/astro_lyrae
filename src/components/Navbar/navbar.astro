@@ -1,114 +1,22 @@
 ---
 import forecast from "@/data/forecast.json";
-import SkyIcon from "./SkyIcon.astro";
-import { eventsFor, pointFor, skyPicture, type SeriesPoint, type SkyEvent } from "@/lib/sky";
+import { SkyStatus } from "./SkyStatus";
+import type { SeriesPoint, SkyEvent } from "@/lib/sky";
 
 const series = forecast.series as SeriesPoint[];
 const sky = forecast.sky as SkyEvent[];
-
-// Primer render con la hora del build. El script lo corrige apenas carga, pero
-// así el icono nunca sale vacío y sin JavaScript igual se ve algo coherente.
-const buildTime = new Date();
-const initial = skyPicture(buildTime, eventsFor(sky, buildTime), pointFor(series, buildTime));
-
-// El reloj sí exige cliente: renderizarlo en el build mostraría la hora en que
-// se compiló el sitio, que es peor que no mostrar nada.
-const bootstrap = JSON.stringify({ series, sky, timeZone: forecast.site.timeZone });
 ---
 
 <header
 	class="sticky top-0 z-50 border-b border-white/10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
 >
-	<nav class="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-3 px-5">
+	{/* client:idle: el reloj importa, pero no tanto como que la página aparezca.
+	    El HTML llega renderizado desde el build; hasta que hidrata se ve "--:--",
+	    nunca una hora falsa. La marca viaja como children para que el layout de
+	    tres zonas viva en un solo lugar. */}
+	<SkyStatus client:idle series={series} sky={sky} timeZone={forecast.site.timeZone}>
 		<a href="/#inicio" class="font-heading text-sm font-semibold tracking-tight">
 			Lyrae<span class="text-primary">.</span>
 		</a>
-
-		<div class="flex items-center gap-3 text-xs text-muted-foreground">
-			<span class="flex items-center gap-2">
-				<SkyIcon active={initial.layers} label={initial.label} />
-				<span class="font-medium text-foreground tabular-nums" data-sky-temp>--</span>
-			</span>
-
-			<span class="hidden items-center gap-1.5 min-[380px]:flex" data-sky-seeing-wrap>
-				<span class="hidden sm:inline">Seeing</span>
-				<span class="tabular-nums" data-sky-seeing>--</span>
-			</span>
-
-			<span class="font-medium text-foreground tabular-nums" data-sky-clock>--:--</span>
-		</div>
-	</nav>
+	</SkyStatus>
 </header>
-
-{/* Bloque de datos, no código: `is:inline` evita que Astro intente procesarlo. */}
-<script is:inline type="application/json" data-sky-data set:html={bootstrap} />
-
-<script>
-	import { eventsFor, pointFor, skyPicture, type SeriesPoint, type SkyEvent } from "@/lib/sky";
-
-	const node = document.querySelector("[data-sky-data]");
-
-	if (node?.textContent) {
-		const { series, sky, timeZone } = JSON.parse(node.textContent) as {
-			series: SeriesPoint[];
-			sky: SkyEvent[];
-			timeZone: string;
-		};
-
-		const icon = document.querySelector("[data-sky-icon]");
-		const clock = document.querySelector("[data-sky-clock]");
-		const temp = document.querySelector("[data-sky-temp]");
-		const seeing = document.querySelector("[data-sky-seeing]");
-		const seeingWrap = document.querySelector<HTMLElement>("[data-sky-seeing-wrap]");
-
-		// La hora que importa es la del complejo, no la del visitante: alguien
-		// mirando desde otro huso vería un dato que no calza con el pronóstico.
-		const clockFmt = new Intl.DateTimeFormat("es-CL", {
-			timeZone,
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: false,
-		});
-
-		const render = () => {
-			const now = new Date();
-
-			if (clock) clock.textContent = clockFmt.format(now);
-
-			const point = pointFor(series, now);
-			const picture = skyPicture(now, eventsFor(sky, now), point);
-
-			if (icon) {
-				icon.setAttribute("title", picture.label);
-				icon.setAttribute("aria-label", picture.label);
-				icon.querySelectorAll<HTMLElement>("[data-layer]").forEach((layer) => {
-					layer.hidden = !picture.layers.includes(layer.dataset.layer ?? "");
-				});
-			}
-
-			// Si el punto más cercano quedó lejos, el pronóstico está viejo (cron
-			// caído, por ejemplo). Mejor no mostrar cifras que mostrarlas falsas.
-			const stale = !point || Math.abs(new Date(point.at).getTime() - now.getTime()) > 6 * 3600e3;
-
-			if (temp) temp.textContent = stale || !point ? "--" : `${point.temperature}°`;
-
-			if (seeingWrap) seeingWrap.hidden = stale || !point?.seeing;
-
-			if (seeing && point?.seeing) {
-				// Con el cielo cubierto el seeing no dice nada: va tachado, igual
-				// que en el bloque del pronóstico.
-				seeing.textContent = point.seeing.range;
-				seeing.classList.toggle("line-through", point.obscured);
-				seeing.classList.toggle("opacity-50", point.obscured);
-			}
-		};
-
-		render();
-		// Cada 30 s alcanza para que el minuto del reloj nunca se vea atrasado.
-		setInterval(render, 30_000);
-		// Al volver a la pestaña, ponerse al día de inmediato.
-		document.addEventListener("visibilitychange", () => {
-			if (!document.hidden) render();
-		});
-	}
-</script>
