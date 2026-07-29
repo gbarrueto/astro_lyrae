@@ -44,6 +44,50 @@ export type SkyPicture = {
 	daytime: "día" | "crepúsculo" | "noche";
 };
 
+/** Color del semáforo de condiciones. Los tokens viven en `global.css`. */
+export const QUALITY_TONE: Record<string, string> = {
+	bueno: "text-good",
+	regular: "text-warn",
+	malo: "text-bad",
+};
+
+/**
+ * Color de la temperatura.
+ *
+ * Un "5°" a secas no dice nada; en azul de helada, sí. Los cortes están
+ * pensados para alguien parado dos horas de noche en la precordillera, no para
+ * un informe meteorológico.
+ */
+export function temperatureTone(celsius: number): string {
+	if (celsius <= 0) return "text-temp-freezing";
+	if (celsius <= 7) return "text-temp-cold";
+	if (celsius <= 14) return "text-temp-mild";
+	if (celsius <= 22) return "text-temp-warm";
+	return "text-temp-hot";
+}
+
+/** Cómo se lee el seeing actual para alguien que nunca lo escuchó nombrar. */
+export function seeingMeaning(
+	seeing: { label: string; range: string; quality: string } | null,
+	obscured: boolean,
+): string {
+	if (!seeing) return "Todavía no tenemos el dato para esta hora.";
+
+	if (obscured) {
+		return `El pronóstico marca un seeing ${seeing.label} (${seeing.range}), pero esta noche el cielo está cubierto: con nubes de por medio da lo mismo qué tan quieta esté la atmósfera.`;
+	}
+
+	if (seeing.quality === "bueno") {
+		return `Esta noche está ${seeing.label} (${seeing.range}): buena para mirar planetas y detalle fino, como los anillos de Saturno o los cráteres de la Luna.`;
+	}
+
+	if (seeing.quality === "regular") {
+		return `Esta noche está ${seeing.label} (${seeing.range}): se observa bien, pero los objetos más pequeños se van a ver algo temblorosos.`;
+	}
+
+	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes —cúmulos, nebulosas— antes que a planetas.`;
+}
+
 const MOON_PHASES = [
 	"moon-new",
 	"moon-waxing-crescent",
