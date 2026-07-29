@@ -97,9 +97,20 @@ Por qué así y no lo otro:
 
 ## Pronóstico
 
-### Avisar cuando la hora de aviso ya pasó
+### Avisar cuando la hora de aviso ya pasó ✅
 
 *(fricción #1 del recorrido de visitante, semilla 593281)*
+
+> **Hecho.** El bloque del plazo en `NightForecast.astro` tiene tres estados y un
+> script inline elige el que corresponde: antes del plazo muestra la hora tope;
+> pasado el plazo reconoce que ya es tarde e **invita a escribir igual**, con
+> enlace directo a WhatsApp; y si el pronóstico ya no es el de la noche vigente,
+> no afirma nada sobre hoy.
+>
+> La comparación es contra la hora del complejo, no la del dispositivo, y el
+> plazo viaja como instante absoluto (`night.bookingDeadlineAt`) para no depender
+> de parsear "15:56". Probados los siete bordes, incluida la madrugada, cuando la
+> noche vigente sigue siendo la de ayer.
 
 `night.bookingDeadline` se muestra como dato fijo: "Para salir esta noche,
 avísanos antes de las 15:56". La visitante llegó a esa línea a las 16:00 —se le
@@ -125,9 +136,16 @@ las 15:56. Escríbenos igual y vemos si alcanzamos a preparar el equipo."*
 - Ojo también con el pronóstico vencido: si `night.date` ya no es hoy —porque
   el cron falló— el bloque no debería afirmar nada sobre "esta noche".
 
-### Viento en el pronóstico
+### Viento en el pronóstico ✅
 
 *(fricción #4 del mismo recorrido)*
+
+> **Hecho.** `wind10m` entra en cada tramo con la escala 1–8 traducida según la
+> tabla oficial de 7Timer, y la dirección pasada a nuestras siglas (SO, O, NO).
+> No se tacha con cielo cubierto. Cuando algún tramo llega a viento fuerte o más,
+> `night.windWarning` agrega un aviso propio: el viento no cambia el veredicto
+> —se puede observar con viento— pero arruina la exposición larga y cambia cuánto
+> hay que abrigarse.
 
 7Timer ya devuelve `wind10m` (`direction` y `speed`) en cada punto y
 `scripts/forecast.mjs` lo descarta. Para fotografía de larga exposición el
