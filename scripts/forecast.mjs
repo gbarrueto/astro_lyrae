@@ -224,6 +224,40 @@ function moonReport(window) {
 	};
 }
 
+/**
+ * Salidas y puestas de sol y luna para varios días, en instantes absolutos.
+ *
+ * La barra superior tiene que decidir a cualquier hora si dibuja sol, luna o
+ * estrellas, y el sitio es estático: en vez de recalcular efemérides en el
+ * navegador, viajan resueltas y el cliente solo compara marcas de tiempo.
+ */
+function skyEvents(fromDate, days = 3) {
+	const events = [];
+
+	for (let i = 0; i < days; i++) {
+		const date = addDays(fromDate, i);
+		const noon = atLocalHour(date, 12);
+		const sun = SunCalc.getTimes(noon, SITE.lat, SITE.lon);
+		const moonTimes = SunCalc.getMoonTimes(atLocalHour(date, 0), SITE.lat, SITE.lon, true);
+		const { fraction, phase } = SunCalc.getMoonIllumination(noon);
+
+		events.push({
+			date,
+			sunrise: sun.sunrise.toISOString(),
+			sunset: sun.sunset.toISOString(),
+			// Crepúsculo civil: el rato en que ya no es de día pero todavía hay luz.
+			duskEnd: sun.dusk.toISOString(),
+			dawnStart: sun.dawn.toISOString(),
+			moonrise: moonTimes.rise ? moonTimes.rise.toISOString() : null,
+			moonset: moonTimes.set ? moonTimes.set.toISOString() : null,
+			moonIllumination: Math.round(fraction * 100),
+			moonPhase: Number(phase.toFixed(3)),
+		});
+	}
+
+	return events;
+}
+
 /* ------------------------------------------------------------------ *
  * Veredicto
  * ------------------------------------------------------------------ */
@@ -307,34 +341,40 @@ async function main() {
 	const initAt = parseInit(astro.init);
 	const window = nightWindow(now);
 
-	const segments = astro.dataseries
-		.map((point) => ({
-			at: new Date(initAt.getTime() + point.timepoint * 3600e3),
-			point,
-		}))
-		// Nos interesa solo lo que cae dentro de la ventana observable.
-		.filter(({ at }) => at >= window.darkFrom && at <= window.darkUntil)
-		.map(({ at, point }) => {
-			const hour = localHour(at);
-			const clouds = scale(CLOUDS, point.cloudcover);
-			return {
-				label: segmentLabel(hour),
-				time: localTime(at),
-				at: at.toISOString(),
-				clouds,
-				seeing: scale(SEEING, point.seeing),
-				transparency: scale(TRANSPARENCY, point.transparency),
-				/**
-				 * Con el cielo tapado, el seeing y la transparencia dejan de decir
-				 * nada: no hay nada que observar por muy quieta que esté la
-				 * atmósfera. La UI los muestra, pero anulados.
-				 */
-				obscured: clouds?.quality === "malo",
-				temperature: point.temp2m,
-				humidity: humidityRange(point.rh2m),
-				precipitation: point.prec_type === "none" ? null : point.prec_type,
-			};
-		});
+	const points = astro.dataseries.map((point) => {
+		const at = new Date(initAt.getTime() + point.timepoint * 3600e3);
+		const clouds = scale(CLOUDS, point.cloudcover);
+		return {
+			at: at.toISOString(),
+			time: localTime(at),
+			clouds,
+			seeing: scale(SEEING, point.seeing),
+			transparency: scale(TRANSPARENCY, point.transparency),
+			/**
+			 * Con el cielo tapado, el seeing y la transparencia dejan de decir
+			 * nada: no hay nada que observar por muy quieta que esté la
+			 * atmósfera. La UI los muestra, pero anulados.
+			 */
+			obscured: clouds?.quality === "malo",
+			temperature: point.temp2m,
+			humidity: humidityRange(point.rh2m),
+			precipitation: point.prec_type === "none" ? null : point.prec_type,
+			_at: at,
+		};
+	});
+
+	// La barra superior necesita condiciones a cualquier hora, no solo de noche,
+	// así que la serie completa viaja aparte. 48 horas alcanzan de sobra: el
+	// archivo se regenera a diario y así sobrevive un día de cron caído.
+	const series = points
+		.filter((p) => p._at >= new Date(now.getTime() - 6 * 3600e3))
+		.slice(0, 16)
+		.map(({ _at, ...rest }) => rest);
+
+	// La ventana observable es la que arma el bloque del pronóstico.
+	const segments = points
+		.filter((p) => p._at >= window.darkFrom && p._at <= window.darkUntil)
+		.map(({ _at, ...rest }) => ({ label: segmentLabel(localHour(_at)), ...rest }));
 
 	const moon = moonReport(window);
 	const verdict = verdictFor(segments);
@@ -365,6 +405,10 @@ async function main() {
 			headline: headlineFor(verdict, segments, moon),
 			segments,
 		},
+		/** Serie continua para la barra superior: condiciones a cualquier hora. */
+		series,
+		/** Efemérides ya resueltas, para elegir el icono sin recalcular nada. */
+		sky: skyEvents(window.date, 3),
 	};
 
 	if (segments.length === 0) {
