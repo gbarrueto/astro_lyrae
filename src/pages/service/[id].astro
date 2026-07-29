@@ -1,0 +1,437 @@
+---
+import { Image } from "astro:assets";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+	WhatsappIcon,
+	ArrowLeft01Icon,
+	ArrowRight01Icon,
+	Clock01Icon,
+	UserGroupIcon,
+	Alert01Icon,
+	CreditCardIcon,
+	Home01Icon,
+} from "@hugeicons/core-free-icons";
+import Layout from "@/layouts/Layout.astro";
+import Navbar from "@/components/Navbar/navbar.astro";
+import {
+	services,
+	serviceIds,
+	mainPrice,
+	getSeason,
+	getTargets,
+	booking,
+	type ServiceId,
+	type ExperienceStep,
+	type GalleryItem,
+	type PriceTier,
+} from "@/lib/services";
+
+export function getStaticPaths() {
+	return serviceIds.map((id) => ({ params: { id } }));
+}
+
+const { id } = Astro.params as { id: ServiceId };
+const service = services[id];
+
+// La temporada se resuelve acá, en el servidor — no en cada render del cliente
+// como hacía ServiceDetail.jsx.
+const season = getSeason();
+const targets = getTargets(service.targetKind, season);
+
+const whatsappHref = `https://wa.me/56988147137?text=${encodeURIComponent(
+	`Hola, me interesa el servicio de ${service.title}.`,
+)}`;
+
+// `satisfies` conserva los tipos literales de cada servicio, y los pasos sin
+// `flexible` pierden la propiedad. Anotarlo acá devuelve la forma común.
+const experience: ExperienceStep[] = service.experience;
+const caveat = "caveat" in service ? service.caveat : null;
+const gallery: GalleryItem[] = "gallery" in service ? service.gallery : [];
+const imagePosition = "imagePosition" in service ? service.imagePosition : undefined;
+const price: PriceTier[] | null = service.price;
+
+// La sesión de fotos se suma a cualquier salida; desde su propia ficha no hay
+// nada que ofrecer, así que el cruce solo aparece en las otras dos.
+const photoAddOn = id === "fotografia-nocturna" ? null : services["fotografia-nocturna"];
+
+// Al terminar la ficha no había a dónde ir: comparar servicios obligaba a
+// devolverse a la portada y entrar de nuevo. Con solo tres servicios, mostrar
+// los otros dos —con precio— resuelve la comparación en el mismo lugar.
+const otherServices = serviceIds
+	.filter((other) => other !== id)
+	.map((other) => ({ id: other, ...services[other], tier: mainPrice(services[other]) }));
+---
+
+<Layout title={`${service.title} — Lyrae Astronomía`} description={service.description}>
+	<Navbar />
+
+	<main class="px-5 pt-8 pb-32 md:pb-16">
+		<div class="mx-auto w-full max-w-5xl">
+			<a
+				href="/#servicios"
+				class="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+			>
+				<HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+				Volver a servicios
+			</a>
+
+			<h1
+				class="mt-2 font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+			>
+				{service.title}
+			</h1>
+
+			<div class="mt-8 grid gap-8 md:grid-cols-2 md:items-start">
+				<Image
+					src={service.image}
+					alt={service.title}
+					widths={[400, 800, 1200]}
+					sizes="(min-width: 768px) 50vw, 100vw"
+					class:list={[
+						"aspect-[4/3] w-full rounded-2xl object-cover ring-1 ring-white/10",
+						imagePosition,
+					]}
+				/>
+
+				<div class="flex flex-col gap-8">
+					<p class="text-sm leading-relaxed text-muted-foreground">
+						{service.description}
+					</p>
+
+					{/* Zona de media: varía por servicio. Hoy son los objetivos
+					    observables según la temporada. */}
+					<section class="rounded-2xl bg-card p-5 ring-1 ring-white/10">
+						<h2 class="font-heading text-lg font-medium">{service.targetsTitle}</h2>
+
+						{
+							targets.length > 0 ? (
+								<ul class="mt-4 flex flex-wrap gap-2">
+									{targets.map((target) => (
+										<li class="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/20">
+											{target}
+										</li>
+									))}
+								</ul>
+							) : (
+								<p class="mt-4 text-sm text-muted-foreground">
+									Estamos fuera de la temporada principal de observación. Escríbenos y
+									revisamos juntos qué se puede ver en la fecha que tienes en mente.
+								</p>
+							)
+						}
+
+						<p class="mt-4 text-xs leading-relaxed text-muted-foreground">
+							{service.targetsNote}
+						</p>
+					</section>
+				</div>
+			</div>
+
+			{
+				gallery.length > 0 && (
+					<section class="mt-8">
+						<ul class="grid gap-4 sm:grid-cols-2">
+							{gallery.map((item) => (
+								<li class="overflow-hidden rounded-2xl bg-card ring-1 ring-white/10">
+									<Image
+										src={item.src}
+										alt={item.alt}
+										widths={[400, 800]}
+										sizes="(min-width: 640px) 50vw, 100vw"
+										class="aspect-[3/2] w-full object-cover"
+									/>
+									<p class="p-4 text-xs leading-relaxed text-muted-foreground">{item.caption}</p>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
+
+			<section class="mt-14">
+				<h2 class="font-heading text-2xl font-semibold tracking-tight">
+					Cómo es la experiencia
+				</h2>
+				<p class="mt-2 text-sm text-muted-foreground">
+					Dura <span class="text-foreground">{service.duration}</span> en total. {
+						service.durationNote
+					}
+				</p>
+
+				<ol class="mt-6 space-y-4">
+					{
+						experience.map((step, index) => (
+							<li class="relative rounded-2xl bg-card p-5 ring-1 ring-white/10">
+								<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+									<span class="font-heading text-sm tabular-nums text-primary">
+										{String(index + 1).padStart(2, "0")}
+									</span>
+									<h3 class="font-heading text-lg font-medium">{step.name}</h3>
+									<span class="ml-auto shrink-0 text-xs text-muted-foreground tabular-nums">
+										{step.duration}
+									</span>
+								</div>
+								<p class="mt-2 text-sm leading-relaxed text-muted-foreground">{step.detail}</p>
+								{step.flexible && <p class="mt-3 text-xs text-primary">{step.flexible}</p>}
+							</li>
+						))
+					}
+				</ol>
+			</section>
+
+			<section class="mt-14">
+				<h2 class="font-heading text-2xl font-semibold tracking-tight">Equipamiento</h2>
+				<div class="mt-6 grid gap-4 md:grid-cols-3">
+					{
+						service.equipment.map((item) => (
+							<article class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+								{item.photo ? (
+									<Image
+										src={item.photo}
+										alt={item.name}
+										widths={[88, 176]}
+										sizes="44px"
+										class="size-11 shrink-0 rounded-xl bg-white object-contain p-1"
+									/>
+								) : (
+									<span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
+										<HugeiconsIcon icon={item.icon} size={22} />
+									</span>
+								)}
+								<div class="min-w-0 flex-1">
+									<h3 class="font-heading text-base font-medium text-balance">
+										{item.name}
+									</h3>
+									{item.summary && (
+										<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+											{item.summary}
+										</p>
+									)}
+									<dl class="mt-4 space-y-2 border-t border-white/10 pt-3 text-sm">
+										{item.specs.map((spec) => (
+											<div class="flex items-baseline justify-between gap-4">
+												<dt class="shrink-0 text-muted-foreground">{spec.label}</dt>
+												<dd class="text-right font-medium tabular-nums">{spec.value}</dd>
+											</div>
+										))}
+									</dl>
+								</div>
+							</article>
+						))
+					}
+				</div>
+			</section>
+
+			{
+				photoAddOn && (
+					<a
+						href="/service/fotografia-nocturna"
+						class="group mt-14 flex items-center gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10 transition hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+					>
+						<div class="min-w-0 flex-1">
+							<p class="text-xs font-medium tracking-[0.18em] text-primary uppercase">
+								Puedes agregar
+							</p>
+							<h2 class="mt-1 font-heading text-lg font-medium">{photoAddOn.title}</h2>
+							<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+								{photoAddOn.duration} más, la misma noche: te retratamos en gran angular
+								bajo el cielo estrellado —sales tú y el paisaje— y te entregamos las fotos
+								procesadas.
+							</p>
+						</div>
+						<span class="shrink-0 text-primary transition group-hover:translate-x-0.5">
+							<HugeiconsIcon icon={ArrowRight01Icon} size={20} />
+						</span>
+					</a>
+				)
+			}
+
+			<section class="mt-14">
+				<h2 class="font-heading text-2xl font-semibold tracking-tight">Antes de reservar</h2>
+				<ul class="mt-6 grid gap-4 sm:grid-cols-2">
+					<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+						<span
+							class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
+						>
+							<HugeiconsIcon icon={Home01Icon} size={22} />
+						</span>
+						<div class="min-w-0">
+							<h3 class="font-heading text-base font-medium">Para quién es</h3>
+							<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+								Solo para huéspedes de <a
+									href="https://www.entrecordilleras.cl"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-primary underline underline-offset-4">Turismo Entre Cordilleras</a
+								>. La salida se hace en el mismo complejo, a pasos de tu cabaña.
+							</p>
+						</div>
+					</li>
+
+					<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+						<span
+							class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
+						>
+							<HugeiconsIcon icon={Clock01Icon} size={22} />
+						</span>
+						<div class="min-w-0">
+							<h3 class="font-heading text-base font-medium">Cuándo avisar</h3>
+							<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+								{booking.deadline} Ese tiempo lo usamos en armar y alinear el equipo antes de
+								que oscurezca.
+							</p>
+						</div>
+					</li>
+
+					<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+						<span
+							class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
+						>
+							<HugeiconsIcon icon={CreditCardIcon} size={22} />
+						</span>
+						<div class="min-w-0">
+							<h3 class="font-heading text-base font-medium">Si el cielo no acompaña</h3>
+							<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+								{booking.payment} Si el pronóstico no acompaña, coordinamos otra noche de tu
+							estadía.
+							</p>
+						</div>
+					</li>
+
+					<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+						<span
+							class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
+						>
+							<HugeiconsIcon icon={UserGroupIcon} size={22} />
+						</span>
+						<div class="min-w-0">
+							<h3 class="font-heading text-base font-medium">Cuánta gente</h3>
+							<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+								{service.groupNote}
+							</p>
+						</div>
+					</li>
+
+					{
+						caveat && (
+							<li class="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10">
+								<span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
+									<HugeiconsIcon icon={Alert01Icon} size={22} />
+								</span>
+								<div class="min-w-0">
+									<h3 class="font-heading text-base font-medium">Ten en cuenta</h3>
+									<p class="mt-1 text-sm leading-relaxed text-muted-foreground">{caveat}</p>
+								</div>
+							</li>
+						)
+					}
+				</ul>
+			</section>
+
+			{/* Cierre: los otros dos servicios con su precio, para comparar sin
+			    volver a la portada. El enlace de vuelta va acá dentro en vez de
+			    un botón flotante, que en móvil competiría con "Reservar". */}
+			<section class="mt-14 border-t border-white/10 pt-10">
+				<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+					<h2 class="font-heading text-2xl font-semibold tracking-tight">
+						Los otros servicios
+					</h2>
+					<a
+						href="/#servicios"
+						class="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+					>
+						<HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+						Volver a servicios
+					</a>
+				</div>
+
+				<ul class="mt-6 grid gap-4 sm:grid-cols-2">
+					{
+						otherServices.map((other) => (
+							<li>
+								<a
+									href={`/service/${other.id}`}
+									class="group flex h-full items-center gap-4 rounded-2xl bg-card p-5 ring-1 ring-white/10 transition hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+								>
+									<Image
+										src={other.cardImage}
+										alt={other.cardTitle}
+										widths={[128, 256]}
+										sizes="64px"
+										class="size-16 shrink-0 rounded-xl object-cover"
+									/>
+									<div class="min-w-0 flex-1">
+										<h3 class="font-heading text-base font-medium text-balance">
+											{other.cardTitle}
+										</h3>
+										<p class="mt-1 flex flex-wrap items-baseline gap-x-2 text-sm">
+											<span class="font-medium whitespace-nowrap">
+												{other.tier ? (
+													<>
+														{other.tier.amount}
+														<span class="ml-1 text-xs font-normal text-muted-foreground">
+															{other.tier.note}
+														</span>
+													</>
+												) : (
+													"Consúltanos"
+												)}
+											</span>
+											<span class="text-xs text-muted-foreground tabular-nums">
+												· {other.duration}
+											</span>
+										</p>
+									</div>
+									<span class="shrink-0 text-primary transition group-hover:translate-x-0.5">
+										<HugeiconsIcon icon={ArrowRight01Icon} size={20} />
+									</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+		</div>
+	</main>
+
+	{/* Precio + reserva. En móvil queda fijo al borde inferior para que esté
+	    siempre a un pulgar de distancia; en desktop vuelve al flujo. */}
+	<div
+		class="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-background/90 backdrop-blur md:static md:border-0 md:bg-transparent md:backdrop-blur-none"
+	>
+		<div
+			class="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-3 md:mb-16 md:rounded-2xl md:bg-card md:px-6 md:py-5 md:ring-1 md:ring-white/10"
+		>
+			<div class="min-w-0">
+				<p class="text-xs text-muted-foreground">
+					{service.duration} · pagas al terminar
+				</p>
+				{
+					price ? (
+						/* Cada tramo es indivisible: si no caben lado a lado se apilan
+						   enteros, en vez de partirse dejando el separador colgando. */
+						<p class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 font-heading text-base leading-snug font-semibold sm:text-lg">
+							{price.map((tier) => (
+								<span class="whitespace-nowrap">
+									{tier.amount}
+									<span class="ml-1 text-xs font-normal text-muted-foreground">{tier.note}</span>
+								</span>
+							))}
+						</p>
+					) : (
+						<p class="font-heading text-base leading-snug font-semibold sm:text-lg">Consúltanos</p>
+					)
+				}
+			</div>
+			<a
+				href={whatsappHref}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-primary px-5 font-medium text-primary-foreground transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+			>
+				<HugeiconsIcon icon={WhatsappIcon} size={20} />
+				Reservar
+			</a>
+		</div>
+	</div>
+</Layout>

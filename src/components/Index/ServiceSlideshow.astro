@@ -1,48 +1,67 @@
 ---
-import { sv1, sv2, sv3 } from "@/assets";
-import { ImageCarousel } from "@/components/ImageCarousel"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Image } from "astro:assets";
+import { services, serviceIds, mainPrice } from "@/lib/services";
 
-const services = [
-  {
-    title: "Observación Visual",
-    description:
-      "Explora el cielo nocturno con tus propios ojos utilizando nuestro telescopio de alta calidad",
-    image: sv1.src,
-    link: "/service/observacion-visual",
-  },
-  {
-    title: "EAA",
-    description:
-      "Disfruta de la Astronomía Asistida Electrónicamente para observar objetos celestes en tiempo real con tecnología avanzada.",
-    image: sv2.src,
-    link: "/service/eaa",
-  },
-  {
-    title: "Fotografía Nocturna",
-    description:
-      "Llévate un recuerdo inolvidable de estos oscuros cielos con nuestras sesiones de fotografía nocturna guiada. ¡O aprende a tomarlas tú mismo!",
-    image: sv3.src,
-    link: "/service/fotografia-nocturna",
-  },
-];
-
-const imgs = services.map((service) => ({
-  src: service.image,
-  alt: service.title,
-  title: service.title,
-  description: service.description,
-}))
-
+// Los datos viven en lib/services: así la tarjeta y la ficha del servicio
+// siempre cuentan lo mismo.
+//
+// En la tarjeta va solo el tramo principal de la tarifa: la observación visual
+// tiene dos tramos y el renglón se parte en móvil. El detalle completo está en
+// la ficha, para quien entre.
+const cards = serviceIds.map((id) => ({ id, ...services[id], tier: mainPrice(services[id]) }));
 ---
 
-<section class="p-4">
-    <Card className="bg-blue-500">
-		  <CardHeader className="text-center">
-		  	<CardTitle className="text-3xl"> Conoce nuestros servicios </CardTitle>
-		  </CardHeader>
-		  <CardContent>
-		  	<ImageCarousel client:load images={ imgs } className="flex flex-row aspect-video"/>
-		  </CardContent>
-    </Card>
+<section id="servicios" class="px-5 py-16">
+	<div class="mx-auto w-full max-w-5xl">
+		<header class="mx-auto mb-8 max-w-2xl text-center">
+			<h2 class="font-heading text-3xl font-semibold tracking-tight text-balance">
+				Conoce nuestros servicios
+			</h2>
+		</header>
+
+		<ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				cards.map((service) => (
+					<li class="contents">
+						<a
+							href={`/service/${service.id}`}
+							class="group flex h-full flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-white/10 transition hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+						>
+							<Image
+								src={service.cardImage}
+								alt={service.cardTitle}
+								widths={[400, 800]}
+								sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
+								class="aspect-[16/10] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+							/>
+							<div class="flex flex-1 flex-col gap-2 p-5">
+								<h3 class="font-heading text-lg font-medium">{service.cardTitle}</h3>
+								<p class="text-sm leading-relaxed text-muted-foreground">{service.tagline}</p>
+								<div class="mt-auto pt-3">
+									<div class="flex items-baseline justify-between gap-3 border-t border-white/10 pt-3">
+										<p class="font-heading text-base leading-snug font-semibold whitespace-nowrap">
+											{service.tier ? (
+												<>
+													{service.tier.amount}
+													<span class="ml-1 text-xs font-normal text-muted-foreground">
+														{service.tier.note}
+													</span>
+												</>
+											) : (
+												"Consúltanos"
+											)}
+										</p>
+										<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
+											{service.duration}
+										</span>
+									</div>
+									<span class="mt-2 block text-sm font-medium text-primary">Ver detalles →</span>
+								</div>
+							</div>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
 </section>
