@@ -2,8 +2,9 @@
   "name": "",
   "type": "module",
   "version": "0.0.1",
+  "packageManager": "pnpm@11.9.0",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=24"
   },
   "scripts": {
     "dev": "astro dev",
