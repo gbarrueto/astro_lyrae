@@ -152,15 +152,10 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 								obscured ? "text-muted-foreground/40" : QUALITY_TONE[seeing.quality],
 							)}
 						/>
+						{/* Solo el estado, no la cifra: "0,75–1"" no le dice nada a casi
+						    nadie. El valor y su lectura viven en el popover, para quien
+						    tenga la curiosidad de tocar. */}
 						<span className="text-xs font-medium">Seeing</span>
-						<span
-							className={cn(
-								"text-xs tabular-nums",
-								obscured ? "text-muted-foreground line-through" : "text-muted-foreground",
-							)}
-						>
-							{seeing.range}
-						</span>
 						<HugeiconsIcon icon={InformationCircleIcon} data-icon="inline-end" />
 					</PopoverTrigger>
 
