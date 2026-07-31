@@ -1,23 +1,29 @@
 ---
-// TODO: placeholder estático. El reloj en vivo, el sondeo del clima cada 30 min
-// y el modal de calidad de seeing llegan cuando se porte navbar.jsx como isla
-// de React con client:load.
+import forecast from "@/data/forecast.json";
+import { SkyStatus } from "./SkyStatus";
+import type { SeriesPoint, SkyEvent } from "@/lib/sky";
+
+const series = forecast.series as SeriesPoint[];
+const sky = forecast.sky as SkyEvent[];
 ---
 
 <header
 	class="sticky top-0 z-50 border-b border-white/10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
 >
-	<nav class="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-3 px-5">
-		<a href="#inicio" class="font-heading text-sm font-semibold tracking-tight">
+	{/* client:load y no `idle`: la barra está sobre el pliegue y muestra "--:--"
+	    hasta que hidrata, que es justo el placeholder que hacía ver el sitio a
+	    medio hacer. El componente es chico y `idle` solo retrasaría eso.
+
+	    La marca viaja como children para que el layout de tres zonas viva en un
+	    solo lugar. */}
+	<SkyStatus
+		client:load
+		series={series}
+		sky={sky}
+		timeZone={forecast.site.timeZone}
+	>
+		<a href="/#inicio" class="font-heading text-sm font-semibold tracking-tight">
 			Lyrae<span class="text-primary">.</span>
 		</a>
-
-		<div class="flex items-center gap-4 text-xs text-muted-foreground tabular-nums">
-			<span class="flex items-center gap-1.5">
-				<span class="size-1.5 rounded-full bg-muted-foreground/50"></span>
-				Seeing --
-			</span>
-			<span>--:--</span>
-		</div>
-	</nav>
+	</SkyStatus>
 </header>

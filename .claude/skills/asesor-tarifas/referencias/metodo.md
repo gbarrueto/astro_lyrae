@@ -34,19 +34,49 @@ completo. La hora nocturna calificada no vale lo mismo que la hora diurna.
 Si el usuario no ha fijado un valor hora, propón uno explícito y márcalo como
 supuesto: es la variable que más mueve el resultado final.
 
-### Amortización del equipo
+**Ajusta el valor hora a quién opera.** No es lo mismo un profesional a tiempo
+completo que vive de esto que un estudiante que lo hace en las vacaciones de
+invierno y verano porque le gusta. El segundo puede aceptar una hora más baja sin
+que sea explotación — pero **no bajo el sueldo mínimo**, que es el piso moral del
+cálculo y anda cerca de los $3.000 la hora (verifícalo, cambia todos los años).
+
+La prueba más útil de todo este método no es el margen: es dividir lo que se
+recauda por las horas trabajadas y mirar el número a los ojos.
 
 ```
-amortización por salida = valor de reposición del equipo / salidas útiles estimadas
+tu hora = precio total del caso típico / horas reales de esa salida
 ```
 
-No es depreciación contable: es cuánto hay que apartar por salida para poder
-reemplazar el equipo cuando muera. Un rig de EAA (refractor + cámara refrigerada
-+ montura GoTo + laptop) vale varias veces un dobson y se desgasta con motores,
-electrónica y humedad. La cámara refrigerada tiene vida útil finita.
+Si esa división da bajo el mínimo en el escenario **más frecuente** —normalmente
+la pareja, no el grupo de ocho— la tarifa está mal, aunque los grupos grandes
+paguen bien.
 
-Si no hay dato del valor del equipo, **pregúntalo**: es uno de los tres datos
-que más cambian la respuesta.
+### Amortización del equipo — solo si corresponde
+
+**Antes de amortizar nada, pregunta si el equipo se compró para el negocio.**
+Es la pregunta que más cambia el resultado, y darla por supuesta es el error más
+caro que puede cometer este método.
+
+- **Comprado para operar** → amortiza:
+
+  ```
+  amortización por salida = valor de reposición / salidas útiles estimadas
+  ```
+
+  No es depreciación contable: es cuánto hay que apartar por salida para poder
+  reemplazar el equipo cuando muera. Un rig de EAA (refractor + cámara
+  refrigerada + montura GoTo + laptop) vale varias veces un dobson y se desgasta
+  con motores, electrónica y humedad.
+
+- **Capital hundido** — comprado como hobby, ya pagado, sin expectativa de
+  recuperarlo → **no lo amortices**. Cargar millones de capital al precio de un
+  servicio que el operador realizaría igual es inventar un costo que no existe.
+  Reemplázalo por un **fondo de reparación** del orden de $2.000 por salida.
+
+En el caso hundido, el equipo **sigue importando** para el precio, pero por otra
+vía: el rig de EAA exige más horas de preparación (alineación, enfoque fino,
+enfriado) que sacar un dobson al patio. La diferencia de precio entre servicios
+se justifica por **horas**, no por capital.
 
 ### Costo de las salidas frustradas
 
@@ -112,6 +142,17 @@ presupuesto de "extras del viaje", no contra el presupuesto de alojamiento. El
 número tiene que leerse como *un agregado que vale la pena*, no como un segundo
 ticket.
 
+### El ancla: la noche de cabaña
+
+**El techo lo fija el precio de la noche que el cliente ya está pagando**, no lo
+que cuesta un tour en otra región. Detalle y tramos en `mercado.md`; la regla
+corta es que un add-on que se decide sin conversarlo vive entre el **20% y el
+40% de una noche**, y que un servicio que cuesta una noche entera se lee como
+"pagar otra noche" y se rechaza solo.
+
+Todo número que salga de este método hay que dividirlo por el valor de la noche
+antes de decirlo en voz alta. Si da más de la mitad, algo se pasó de largo.
+
 ### Contra qué compite de verdad
 
 1. **La tinaja** — gratis, ilimitada, al lado de la cabaña, sin coordinar con
@@ -120,9 +161,15 @@ ticket.
    Consecuencia de precio: **la tarifa tiene que ser lo bastante baja para
    decidirse rápido, o lo bastante especial para que se sienta como el hito de
    la estadía.** El punto muerto entre ambas es el peor lugar posible.
-2. **Lo que costaría afuera.** Un tour equivalente en Elqui o Atacama, más
-   traslado, más la noche que hay que dormir allá. Ese es el techo psicológico
-   superior, y hoy está muy por encima de lo que se cobra acá.
+2. **Estirar la estadía.** Con el astroturismo caro, la comparación deja de ser
+   "esto o la tinaja" y pasa a ser "esto o una noche más". Esa comparación no la
+   gana nunca.
+3. **Lo que gasta esta misma persona en el mismo viaje**: una comida para dos, el
+   cine, una actividad de un día. Si el servicio cuesta parecido a eso, el precio
+   no necesita defensa.
+
+**Lo que NO es un ancla acá:** un tour de Elqui o Atacama. Ver `mercado.md`,
+sección 2, para por qué esa comparación no es justa y cuándo pasaría a serlo.
 
 ### La aritmética familiar
 

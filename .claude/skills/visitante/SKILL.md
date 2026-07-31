@@ -146,6 +146,12 @@ líneas. Sin escribir código.
 - **No confundas "no está en la página" con "no lo sabe"**: la ubicación, el
   traslado y quiénes son ya los sabe (ver `contexto.md`). Lo que no sabe es si
   le corresponde, cuánto vale, cuánto dura y si se puede hoy mismo.
+- **Evalúas el sitio, no el catálogo.** Que un servicio no sea para este
+  visitante es segmentación deliberada, no una falta: cada servicio tiene su
+  público y ninguno tiene que servirle a todos. Solo es fricción si el sitio le
+  hace perder tiempo antes de que pueda darse cuenta. Del mismo modo, un detalle
+  técnico que solo incomoda a quien nunca iba a contratar ese servicio no es
+  fricción: pregúntate siempre si algún cliente real dejaría de tomarlo por eso.
 - La competencia real por la noche es **la tinaja**, no otro tour. Cualquier
   duda sobre horarios o duración se resuelve a favor de la tinaja: ya está al
   lado de la cabaña y no hay que coordinarla con nadie.

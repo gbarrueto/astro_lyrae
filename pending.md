@@ -95,6 +95,122 @@ Por qué así y no lo otro:
 
 ---
 
+## Pronóstico
+
+### Avisar cuando la hora de aviso ya pasó ✅
+
+*(fricción #1 del recorrido de visitante, semilla 593281)*
+
+> **Hecho.** El bloque del plazo en `NightForecast.astro` tiene tres estados y un
+> script inline elige el que corresponde: antes del plazo muestra la hora tope;
+> pasado el plazo reconoce que ya es tarde e **invita a escribir igual**, con
+> enlace directo a WhatsApp; y si el pronóstico ya no es el de la noche vigente,
+> no afirma nada sobre hoy.
+>
+> La comparación es contra la hora del complejo, no la del dispositivo, y el
+> plazo viaja como instante absoluto (`night.bookingDeadlineAt`) para no depender
+> de parsear "15:56". Probados los siete bordes, incluida la madrugada, cuando la
+> noche vigente sigue siendo la de ayer.
+
+`night.bookingDeadline` se muestra como dato fijo: "Para salir esta noche,
+avísanos antes de las 15:56". La visitante llegó a esa línea a las 16:00 —se le
+había pasado por cuatro minutos— y **la página no se lo dijo**: tuvo que mirar
+la hora en su celular y darse cuenta sola. Esa noche era la única que le
+quedaba.
+
+El sitio es estático y `forecast.json` se genera una vez al día, así que la
+comparación con "ahora" solo puede ocurrir en el cliente: una isla mínima (o un
+script inline) que compare `bookingDeadline` con el reloj del visitante y
+cambie el mensaje.
+
+**Importante: cuando el plazo ya pasó, no cerrar la puerta.** El plazo son dos
+horas antes del atardecer para alcanzar a armar y alinear, pero se pueden hacer
+excepciones y dar por perdida la noche por sistema es perder un cliente que
+estaba dispuesto. El mensaje debería reconocer que ya es tarde y aun así
+invitar a escribir, algo en la línea de: *"La hora recomendada para avisar era
+las 15:56. Escríbenos igual y vemos si alcanzamos a preparar el equipo."*
+
+- Ojo con la zona horaria: el reloj del visitante puede no ser el de Chile
+  (alguien planificando desde otro país). Comparar contra la hora del complejo,
+  no contra la local del dispositivo.
+- Ojo también con el pronóstico vencido: si `night.date` ya no es hoy —porque
+  el cron falló— el bloque no debería afirmar nada sobre "esta noche".
+
+### Viento en el pronóstico ✅
+
+*(fricción #4 del mismo recorrido)*
+
+> **Hecho.** `wind10m` entra en cada tramo con la escala 1–8 traducida según la
+> tabla oficial de 7Timer, y la dirección pasada a nuestras siglas (SO, O, NO).
+> No se tacha con cielo cubierto. Cuando algún tramo llega a viento fuerte o más,
+> `night.windWarning` agrega un aviso propio: el viento no cambia el veredicto
+> —se puede observar con viento— pero arruina la exposición larga y cambia cuánto
+> hay que abrigarse.
+
+7Timer ya devuelve `wind10m` (`direction` y `speed`) en cada punto y
+`scripts/forecast.mjs` lo descarta. Para fotografía de larga exposición el
+viento decide tanto como las nubes —con ráfagas no hay trípode que aguante— y
+para el resto del grupo es lo que define cuánto hay que abrigarse, que es la
+pregunta práctica de quien sale dos horas a estar quieto de noche.
+
+- `speed` viene como escala 1–8, no en m/s: traducirla con la tabla de la
+  documentación de 7Timer, sin inventar los cortes.
+- Igual que el seeing, el viento **no** se tacha con cielo cubierto: sigue
+  siendo válido para decidir el abrigo.
+
+---
+
+## Barra superior
+
+### Dibujos definitivos de los iconos de cielo
+
+La composición por capas ya funciona y está enchufada, pero los 16 archivos de
+`src/assets/sky/` son placeholders geométricos hechos para verificar la lógica,
+no para mostrarlos en producción.
+
+Los dibujos vienen en camino. Lo que hay que respetar está en
+`docs/iconos-cielo.md`: nombres de archivo, lienzo de 24×24, hemisferio sur —la
+luna creciente se ilumina por la izquierda— y que las capas se apilan, así que
+las nubes van abajo y los cuerpos celestes arriba a la derecha.
+
+Reemplazar un archivo con el mismo nombre es todo lo que hay que hacer; no se
+toca código.
+
+---
+
+## Interfaz
+
+### Sacarle provecho a shadcn
+
+El proyecto tiene shadcn configurado (base-ui, estilo `maia`, iconos hugeicons)
+y hasta ahora solo usa `button`, `card`, `carousel`, `aspect-ratio` y `popover`.
+Buena parte de la interfaz son `div` con `ring-1` y `rounded-2xl` escritos a
+mano, que es justo lo que los componentes ya resuelven —y con estados de foco y
+accesibilidad incluidos.
+
+Ordenado por lo que más rinde:
+
+1. **`Accordion` en "Deberías saber"** (`GoodToKnow.astro`). Hoy son tres
+   tarjetas siempre abiertas que suman bastante scroll en móvil. Plegadas, el
+   visitante escanea los tres títulos y abre el que le interesa.
+2. **`Alert` para los avisos.** El bloque de exclusividad en `Intro.astro`, el
+   `windWarning` y la nota de "seeing tachado" en `NightForecast.astro` son
+   todos `div` estilizados a mano.
+3. **`Badge` para los chips.** Los objetivos observables (`Nebulosa Carina`,
+   `47 Tucanae`) y el chip del veredicto de la noche son spans con clases.
+4. **`Separator`** en vez de los `border-t` repartidos por las tarjetas.
+5. **`Tooltip` o `Popover` en el resto de los términos técnicos.** El seeing ya
+   lo tiene en la barra; transparencia, apertura y relación focal siguen sin
+   explicación en el punto donde aparecen.
+
+Discutible y por eso al final: **`Tabs` en la ficha de servicio** para separar
+experiencia / equipamiento / antes de reservar. Acortaría mucho la página, pero
+esconde contenido que hoy se encuentra bajando, y en los recorridos simulados el
+aficionado avanzado sí leía el equipamiento completo. No hacerlo sin evaluarlo
+antes.
+
+---
+
 ## Herramientas
 
 ### Reemplazar el capturador del recorrido simulado
@@ -121,17 +237,62 @@ Debería además bajar bastante el tiempo por página.
 
 ---
 
+## Descartadas (no volver a reportarlas)
+
+- **"No hay oferta para quien trae su propio equipo"** *(semilla 593281)*. El
+  servicio de fotografía nocturna es, a propósito, para quien no sabe y quiere
+  un recuerdo sin tocar nada. Quien quiere fotografiar por su cuenta le
+  pregunta al anfitrión de TEC: es una conversación, no un producto del sitio.
+- **"El lente 28–70 f/3.5–5.6 es lento para Vía Láctea"** *(semilla 593281)*.
+  Cierto y también irrelevante: el cliente de ese servicio no lee relaciones
+  focales, y el único que las lee ya trae su propia cámara y no lo va a
+  contratar. Ningún cliente deja de tomar el servicio por eso.
+
+Ambas son el mismo sesgo: juzgar el catálogo desde el perfil del visitante en
+vez de juzgar la experiencia del sitio. Un servicio que no es para alguien es
+segmentación, no una falta.
+
+---
+
 ## En curso (no requieren nota, anotados para no re-reportarlos)
 
-- Indicador `Seeing --  --:--` de la barra superior *(fricción #3)*.
-- Chips de hora del pronóstico sin estado visible *(fricción #5)*.
-- Cambios pensados para la tabla de pronóstico *(fricciones #1 y #6)*.
+- ~~Indicador `Seeing --  --:--` de la barra superior~~ *(fricción #3)*. **Hecho:**
+  la barra muestra hora del complejo, temperatura, seeing e icono de cielo
+  compuesto por capas. Faltan los dibujos definitivos — hoy hay placeholders
+  geométricos en `src/assets/sky/`, ver `docs/iconos-cielo.md`.
+- ~~Chips de hora del pronóstico sin estado visible~~ *(fricción #5)*. **Resuelto
+  por eliminación:** los seis botones se fueron junto con la tabla. El modelo
+  entrega un punto cada 3 horas, así que elegir una hora exacta prometía una
+  precisión que no existe.
+- ~~Cambios pensados para la tabla de pronóstico~~ *(fricciones #1 y #6)*.
+  **Hecho:** `NightForecast.astro` reemplaza el iframe de meteoblue por un
+  veredicto de la noche en lenguaje llano, con los tramos de 3 horas y el seeing
+  tachado cuando hay nubes.
 
 ---
 
 ## Decisiones abiertas
 
-### Tarifa del EAA
+### Tarifa del EAA ✅
+
+> **Resuelto.** Los tres servicios pasaron de tarifa por persona a **mínimo por
+> salida (hasta 2 personas) + adicional por persona**: Observación Visual
+> $15.000 +$5.000/adulto +$2.500/niño; EAA $20.000 +$4.500/adulto
+> +$2.500/niño; Fotografía $12.000 sumada a otra salida, $18.000 sola.
+>
+> El error de fondo no era el nivel sino la estructura: cobrar por cabeza un
+> servicio cuyo costo es por salida dejaba al operador bajo el sueldo mínimo con
+> una pareja —el caso más frecuente— y cobraba $32.000 a una familia de 4 por un
+> EAA que no cuesta un peso más de operar. El nivel se ancló en la **noche de
+> cabaña** ($50.000–$70.000): cada tarifa queda entre el 20% y el 40% de una
+> noche.
+>
+> Dos supuestos que sostienen estos números y conviene no perder: el equipo es
+> **capital hundido** (compra de hobby, no se amortiza) y el operador trabaja
+> **estacionalmente**. Si alguna vez hay que pasar la batuta a alguien que deba
+> comprar equipo, estos precios no le sirven.
+>
+> Método y anclas en `.claude/skills/asesor-tarifas/`.
 
 El EAA quedó a `$5.000 por persona`, el mismo valor que el tramo adulto de la
 Observación Visual. La duda: el EAA implica bastante más trabajo de armado y
