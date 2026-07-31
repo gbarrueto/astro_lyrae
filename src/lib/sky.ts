@@ -1,12 +1,6 @@
 /**
- * Qué dibujo del cielo corresponde a una hora dada.
- *
- * El icono se compone por capas en vez de existir uno por combinación: ocho
- * fases de luna por cuatro niveles de nube por tres precipitaciones serían
- * cientos de dibujos. Ver `docs/iconos-cielo.md`.
- *
- * La misma función corre en el build (para el primer render) y en el navegador
- * (para refrescar sin recargar), así que no depende de nada del entorno.
+ * Icono de cielo compuesto por capas y helpers de presentación del pronóstico.
+ * Corre igual en el build y en el navegador. Ver `docs/iconos-cielo.md`.
  */
 
 export type SkyEvent = {
@@ -48,20 +42,14 @@ export type SkyPicture = {
 	daytime: "día" | "crepúsculo" | "noche";
 };
 
-/** Color del semáforo de condiciones. Los tokens viven en `global.css`. */
+/** Tokens definidos en `global.css`. */
 export const QUALITY_TONE: Record<string, string> = {
 	bueno: "text-good",
 	regular: "text-warn",
 	malo: "text-bad",
 };
 
-/**
- * Color de la temperatura.
- *
- * Un "5°" a secas no dice nada; en azul de helada, sí. Los cortes están
- * pensados para alguien parado dos horas de noche en la precordillera, no para
- * un informe meteorológico.
- */
+/** Cortes pensados para una noche de precordillera, no para un informe. */
 export function temperatureTone(celsius: number): string {
 	if (celsius <= 0) return "text-temp-freezing";
 	if (celsius <= 7) return "text-temp-cold";
@@ -70,7 +58,7 @@ export function temperatureTone(celsius: number): string {
 	return "text-temp-hot";
 }
 
-/** Cómo se lee el seeing actual para alguien que nunca lo escuchó nombrar. */
+/** El seeing actual en lenguaje llano. */
 export function seeingMeaning(
 	seeing: { label: string; range: string; quality: string } | null,
 	obscured: boolean,
@@ -168,14 +156,7 @@ export function pointFor(series: SeriesPoint[], at: Date): SeriesPoint | null {
 	);
 }
 
-/**
- * Compone el icono.
- *
- * Orden de las capas: halo, cuerpo celeste, nubes, precipitación. Con el cielo
- * cubierto el cuerpo queda detrás de la nube; si además brilla fuerte (el sol,
- * o la luna sobre 60 % de iluminación) se enciende el halo, que es como se ve
- * de verdad una nube densa con la luna llena detrás.
- */
+/** Capas de atrás hacia adelante: halo, cuerpo, nubes, precipitación. */
 export function skyPicture(
 	at: Date,
 	event: SkyEvent | null,
@@ -185,7 +166,6 @@ export function skyPicture(
 	const clouds = cloudLayer(point?.clouds?.code);
 	const heavy = clouds.layer === "clouds-heavy";
 
-	// Sin efemérides no se puede saber si es de día: se muestra solo el cielo.
 	if (!event) {
 		return {
 			layers: clouds.layer ? [clouds.layer] : ["stars"],
@@ -208,8 +188,7 @@ export function skyPicture(
 		bodyName = isTwilight ? "atardecer" : "día";
 		bright = true;
 	} else {
-		// De noche, la luna solo cuenta si está sobre el horizonte. Puede faltar
-		// alguno de los dos eventos cuando la luna no sale o no se pone ese día.
+		// Puede faltar alguno de los dos eventos si la luna no sale o no se pone.
 		const rise = event.moonrise ? ms(event.moonrise) : null;
 		const set = event.moonset ? ms(event.moonset) : null;
 		const up =
@@ -234,7 +213,6 @@ export function skyPicture(
 		}
 	}
 
-	// Con el cielo cubierto y un cuerpo que no brilla, no queda nada que asomar.
 	const showBody = !(heavy && !bright);
 
 	const layers: SkyLayer[] = [];
@@ -242,7 +220,7 @@ export function skyPicture(
 	if (showBody) layers.push(body);
 	if (clouds.layer) layers.push(clouds.layer);
 
-	// Llover con cielo despejado no tiene sentido: si el modelo lo reporta, se ignora.
+	// Llover con cielo despejado no tiene sentido: se ignora.
 	if (point?.precipitation && clouds.layer && clouds.layer !== "clouds-light") {
 		layers.push(point.precipitation === "snow" ? "snow" : "rain");
 	}

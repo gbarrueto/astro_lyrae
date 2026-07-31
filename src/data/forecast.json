@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-07-31T02:43:16.220Z",
+	"generatedAt": "2026-07-31T03:59:13.879Z",
 	"model": {
 		"name": "7Timer! ASTRO",
 		"basis": "GFS",
@@ -132,38 +132,6 @@
 		]
 	},
 	"series": [
-		{
-			"at": "2026-07-30T21:00:00.000Z",
-			"time": "17:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 4,
-				"range": "1–1,25\"",
-				"label": "aceptable",
-				"quality": "regular"
-			},
-			"transparency": {
-				"code": 4,
-				"label": "aceptable",
-				"quality": "regular"
-			},
-			"obscured": true,
-			"temperature": 13,
-			"wind": {
-				"code": 3,
-				"range": "3,4–8 m/s",
-				"label": "moderado",
-				"quality": "bueno",
-				"direction": "N"
-			},
-			"humidity": "95–100 %",
-			"precipitation": null
-		},
 		{
 			"at": "2026-07-31T00:00:00.000Z",
 			"time": "20:00",
@@ -634,6 +602,38 @@
 			},
 			"obscured": true,
 			"temperature": 7,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "moderado",
+				"quality": "bueno",
+				"direction": "N"
+			},
+			"humidity": "95–100 %",
+			"precipitation": "snow"
+		},
+		{
+			"at": "2026-08-01T21:00:00.000Z",
+			"time": "17:00",
+			"clouds": {
+				"code": 9,
+				"range": "94–100 %",
+				"label": "cubierto",
+				"quality": "malo"
+			},
+			"seeing": {
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
+			},
+			"transparency": {
+				"code": 8,
+				"label": "muy pobre",
+				"quality": "malo"
+			},
+			"obscured": true,
+			"temperature": 6,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",

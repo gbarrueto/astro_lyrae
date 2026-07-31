@@ -84,26 +84,18 @@ export function getTargets(kind: TargetKind, season: Season): string[] {
 }
 
 /* ------------------------------------------------------------------ *
- * Servicios
- * ------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------ *
- * Condiciones comunes a todos los servicios
+ * Servicios: condiciones comunes
  * ------------------------------------------------------------------ */
 
 export const booking = {
 	/** El equipo hay que armarlo y alinearlo antes de que oscurezca. */
 	deadline: "Avísanos a más tardar 2 horas antes del atardecer.",
-	/** Cobrar solo la sesión hecha es lo que hace irrelevante el pronóstico. */
+	/** Cobrar solo la sesión hecha hace irrelevante el pronóstico. */
 	payment: "Pagas al terminar la sesión: si no se alcanza a observar, no pagas nada.",
 	group: "Hasta 10 personas por sesión.",
 } as const;
 
-/**
- * Calidad del cielo del lugar. No pertenece a ningún servicio —es del sitio— y
- * es el argumento de venta más fuerte del negocio: quien viaja a fotografiar
- * decide por este dato.
- */
+/** Calidad del cielo del lugar: es del sitio, no de un servicio. */
 export const sky = {
 	bortle: { value: "Clase 2", label: "Escala Bortle", note: "de 9, donde 1 es el cielo más oscuro" },
 	sqm: { value: "21.94", label: "Brillo del cielo", note: "mag/arcsec² — mientras más alto, más oscuro" },
@@ -112,11 +104,7 @@ export const sky = {
 
 export type Spec = { label: string; value: string };
 
-/**
- * Un tramo de la salida. `flexible` lleva el aviso de por qué se puede mover: el
- * motivo cambia según el tramo —el tour se acorta por apuro, las fotos se
- * omiten por desinterés— así que el texto no puede vivir en la plantilla.
- */
+/** Un tramo de la salida. `flexible` lleva el aviso de por qué se puede mover. */
 export type ExperienceStep = {
 	name: string;
 	duration: string;
@@ -133,25 +121,13 @@ export type Equipment = {
 	specs: Spec[];
 };
 
-/**
- * Un tramo de la tarifa. Se guardan por separado —y no como una sola frase—
- * porque en móvil el renglón se parte: escrito "$15.000 por salida + $5.000 por
- * adulto" el separador termina colgando al inicio de la segunda línea.
- */
+/** Un tramo de la tarifa. Por separado y no como frase: en móvil el renglón se parte. */
 export type PriceTier = { amount: string; note: string };
 
 /**
- * Tarifa de un servicio.
- *
- * `headline` es lo único que cabe donde el ancho es fijo —la barra de la ficha
- * y las tarjetas de portada, que además llevan la duración al lado—, así que
- * tiene que sostenerse solo: monto corto y nota de dos o tres palabras. El
- * desglose completo vive en el bloque "Cuánto vale" de la ficha, que es donde
- * alguien lo lee de verdad.
- *
- * Con `tiers` presente el titular se muestra como "desde $X". Los tramos pueden
- * sumarse al titular (personas adicionales) o ser una modalidad más cara que él
- * (la sesión de fotos por su cuenta); en ambos casos "desde" dice la verdad.
+ * Tarifa de un servicio. `headline` va donde el ancho es fijo, así que debe
+ * sostenerse solo; el desglose completo vive en la ficha. Con `tiers` presente
+ * el titular se muestra como "desde $X".
  */
 export type Pricing = {
 	headline: PriceTier;

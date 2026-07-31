@@ -23,8 +23,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 
-// Las 16 capas del icono, inline. Son diminutas y así el cambio de icono no
-// dispara descargas: ver docs/iconos-cielo.md.
+// Capas inline; ver docs/iconos-cielo.md.
 const SKY_LAYERS = import.meta.glob("../../assets/sky/*.svg", {
 	query: "?raw",
 	import: "default",
@@ -47,8 +46,7 @@ type Props = {
 };
 
 export function SkyStatus({ series, sky, timeZone, children }: Props) {
-	// El primer render en el servidor no puede saber la hora del visitante, así
-	// que parte en null y se llena al hidratar.
+	// El servidor no sabe la hora del visitante: se llena al hidratar.
 	const [now, setNow] = useState<Date | null>(null);
 
 	useEffect(() => {
@@ -77,19 +75,16 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 	const picture = skyPicture(at, eventsFor(sky, at), point);
 	const [hours, minutes] = clockFmt.format(at).split(":");
 
-	// Si el punto más cercano quedó lejos, el pronóstico está viejo —cron caído,
-	// por ejemplo— y es preferible no mostrar cifras a mostrarlas falsas.
+	// Punto lejano = pronóstico viejo: mejor no mostrar cifras.
 	const stale = !point || Math.abs(new Date(point.at).getTime() - at.getTime()) > 6 * 3600e3;
 	const seeing = stale ? null : point.seeing;
 	const obscured = Boolean(point?.obscured);
 
 	return (
-		// Tres columnas para que el bloque del medio quede centrado respecto a la
-		// barra completa, y no se corra según cuánto ocupen la marca o el botón.
+		// Columnas laterales iguales para que el centro no se corra.
 		<nav className="mx-auto grid h-14 w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-5">
 			<div className="justify-self-start">{children}</div>
 
-			{/* Centro: la hora manda, el clima la acompaña. */}
 			<div className="flex items-center gap-2.5 justify-self-center">
 				<span
 					className="relative inline-block size-6 shrink-0 text-primary"
@@ -128,7 +123,6 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 				)}
 			</div>
 
-			{/* Derecha: el seeing, que es la palabra que despierta curiosidad. */}
 			<div className="justify-self-end">
 				{seeing && (
 					<Popover>
@@ -137,8 +131,6 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 							<Button
 								variant="outline"
 								size="sm"
-								// El radio casi recto lo distingue del resto de la interfaz,
-								// que es toda de esquinas redondeadas.
 								className="h-7 gap-1.5 rounded-[1px] px-2"
 								aria-label={`Seeing: ${seeing.label}. Toca para saber qué significa`}
 							/>
@@ -147,15 +139,10 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 						<span
 							className={cn(
 								"size-2 rounded-full bg-current",
-								// El color solo tiene sentido si el dato aplica: con el cielo
-								// cubierto el punto se apaga, igual que el valor se tacha.
 								obscured ? "text-muted-foreground/40" : QUALITY_TONE[seeing.quality],
 							)}
 						/>
-						{/* Solo el estado, no la cifra: "0,75–1"" no le dice nada a casi
-						    nadie. El valor y su lectura viven en el popover, para quien
-						    tenga la curiosidad de tocar. */}
-						<span className="text-xs font-medium">Seeing</span>
+							<span className="text-xs font-medium">Seeing</span>
 						<HugeiconsIcon icon={InformationCircleIcon} data-icon="inline-end" />
 					</PopoverTrigger>
 
