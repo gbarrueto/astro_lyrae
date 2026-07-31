@@ -88,6 +88,23 @@ export function seeingMeaning(
 	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes antes que a planetas.`;
 }
 
+/** Sigla de origen del viento → hacia dónde apunta la flecha, y su nombre. */
+const WIND_ARROWS: Record<string, { deg: number; name: string }> = {
+	N: { deg: 180, name: "norte" },
+	NE: { deg: 225, name: "noreste" },
+	E: { deg: 270, name: "este" },
+	SE: { deg: 315, name: "sureste" },
+	S: { deg: 0, name: "sur" },
+	SO: { deg: 45, name: "suroeste" },
+	O: { deg: 90, name: "oeste" },
+	NO: { deg: 135, name: "noroeste" },
+};
+
+export function windArrow(direction: string | null): { deg: number; label: string } | null {
+	const arrow = direction ? WIND_ARROWS[direction] : null;
+	return arrow ? { deg: arrow.deg, label: `viento del ${arrow.name}` } : null;
+}
+
 const MOON_PHASES = [
 	"moon-new",
 	"moon-waxing-crescent",

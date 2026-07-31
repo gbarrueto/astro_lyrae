@@ -1,7 +1,14 @@
 ---
 import { HugeiconsIcon } from "@hugeicons/react";
-import { SunsetIcon, Moon02Icon, CloudIcon, Clock01Icon } from "@hugeicons/core-free-icons";
+import {
+	SunsetIcon,
+	Moon02Icon,
+	CloudIcon,
+	Clock01Icon,
+	ArrowUp01Icon,
+} from "@hugeicons/core-free-icons";
 import forecast from "@/data/forecast.json";
+import { windArrow } from "@/lib/sky";
 
 // El pronóstico lo escribe scripts/forecast.mjs una vez al día (7Timer! ASTRO)
 // y viaja como archivo: acá no se consulta nada en tiempo de render.
@@ -235,15 +242,22 @@ const moonNote =
 									{segment.temperature} °C
 								</dd>
 							</div>
-							{/* El viento no se tacha con nubes: decide el abrigo y la
-							    estabilidad del trípode, no la visibilidad. */}
 							<div class="flex items-baseline justify-between gap-2">
 								<dt class="text-xs text-muted-foreground">Viento</dt>
 								<dd class={`text-right text-xs font-medium ${quality(segment.wind.quality)}`}>
 									{segment.wind.label}
-									<span class="ml-1 font-normal text-muted-foreground">
-										{segment.wind.direction}
-									</span>
+									{
+										windArrow(segment.wind.direction) && (
+											<span
+												class="ml-1 inline-block align-middle text-muted-foreground"
+												title={windArrow(segment.wind.direction)!.label}
+												aria-label={windArrow(segment.wind.direction)!.label}
+												style={`transform: rotate(${windArrow(segment.wind.direction)!.deg}deg)`}
+											>
+												<HugeiconsIcon icon={ArrowUp01Icon} size={13} />
+											</span>
+										)
+									}
 								</dd>
 							</div>
 							<div class="flex items-baseline justify-between gap-2">

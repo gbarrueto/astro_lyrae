@@ -95,9 +95,9 @@ const WIND = [
 	null,
 	{ range: "<0,3 m/s", label: "calma", quality: "bueno" },
 	{ range: "0,3–3,4 m/s", label: "brisa suave", quality: "bueno" },
-	{ range: "3,4–8 m/s", label: "viento moderado", quality: "bueno" },
-	{ range: "8–10,8 m/s", label: "viento fresco", quality: "regular" },
-	{ range: "10,8–17,2 m/s", label: "viento fuerte", quality: "malo" },
+	{ range: "3,4–8 m/s", label: "moderado", quality: "bueno" },
+	{ range: "8–10,8 m/s", label: "fresco", quality: "regular" },
+	{ range: "10,8–17,2 m/s", label: "fuerte", quality: "malo" },
 	{ range: "17,2–24,5 m/s", label: "temporal", quality: "malo" },
 	{ range: "24,5–32,6 m/s", label: "tormenta", quality: "malo" },
 	{ range: ">32,6 m/s", label: "huracanado", quality: "malo" },
@@ -325,7 +325,7 @@ function windWarningFor(segments) {
 	const worst = windy.reduce((a, b) => (b.wind.code > a.wind.code ? b : a));
 	const when = windy.length === segments.length ? "toda la noche" : `cerca de las ${worst.time}`;
 
-	return `Se espera ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
+	return `Se espera viento ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
 }
 
 function headlineFor(verdict, segments, moon) {

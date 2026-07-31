@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-07-31T02:07:46.389Z",
+	"generatedAt": "2026-07-31T02:43:16.220Z",
 	"model": {
 		"name": "7Timer! ASTRO",
 		"basis": "GFS",
@@ -56,7 +56,7 @@
 				"wind": {
 					"code": 3,
 					"range": "3,4–8 m/s",
-					"label": "viento moderado",
+					"label": "moderado",
 					"quality": "bueno",
 					"direction": "N"
 				},
@@ -89,7 +89,7 @@
 				"wind": {
 					"code": 3,
 					"range": "3,4–8 m/s",
-					"label": "viento moderado",
+					"label": "moderado",
 					"quality": "bueno",
 					"direction": "N"
 				},
@@ -157,7 +157,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -189,7 +189,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -221,7 +221,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -381,7 +381,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -413,7 +413,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -477,7 +477,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "NO"
 			},
@@ -509,7 +509,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -541,7 +541,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -573,7 +573,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -605,7 +605,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -637,7 +637,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
