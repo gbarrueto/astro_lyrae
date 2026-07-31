@@ -29,9 +29,13 @@ export type SeriesPoint = {
 	transparency: { code: number; label: string; quality: string } | null;
 	obscured: boolean;
 	temperature: number;
+	wind: { code: number; range: string; label: string; quality: string; direction: string } | null;
 	humidity: string | null;
 	precipitation: string | null;
 };
+
+/** Un tramo de la noche: un punto de la serie con su nombre. */
+export type NightSegment = SeriesPoint & { label: string };
 
 /** Nombre de archivo dentro de `src/assets/sky/`, sin extensión. */
 export type SkyLayer = string;
