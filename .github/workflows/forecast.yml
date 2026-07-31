@@ -22,13 +22,19 @@ jobs:
   actualizar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      # Sin `version`: la toma de "packageManager" en package.json, que es la
+      # misma que se usa localmente. Cuando ese campo no existía, esta acción
+      # fallaba con "No pnpm version is specified".
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      # La versión sale de .nvmrc para no tener el número repetido en dos
+      # lugares. Ojo: es 26 acá, pero el build del sitio en Vercel corre en 24.x,
+      # que es lo más nuevo que ofrecen.
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       # --ignore-scripts salta la compilación de sharp y esbuild: el script solo
