@@ -74,7 +74,7 @@ export function seeingMeaning(
 	if (!seeing) return "Todavía no tenemos el dato para esta hora.";
 
 	if (obscured) {
-		return `El pronóstico marca un seeing ${seeing.label} (${seeing.range}), pero esta noche el cielo está cubierto: con nubes de por medio da lo mismo qué tan quieta esté la atmósfera.`;
+		return `El pronóstico marca un seeing ${seeing.label} (${seeing.range}), pero esta noche está nublado.`;
 	}
 
 	if (seeing.quality === "bueno") {
@@ -85,7 +85,7 @@ export function seeingMeaning(
 		return `Esta noche está ${seeing.label} (${seeing.range}): se observa bien, pero los objetos más pequeños se van a ver algo temblorosos.`;
 	}
 
-	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes —cúmulos, nebulosas— antes que a planetas.`;
+	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes antes que a planetas.`;
 }
 
 const MOON_PHASES = [
