@@ -113,11 +113,11 @@
 				"obscured": true,
 				"temperature": 7,
 				"wind": {
-					"code": 3,
-					"range": "3,4–8 m/s",
-					"label": "moderado",
+					"code": 2,
+					"range": "0,3–3,4 m/s",
+					"label": "brisa suave",
 					"quality": "bueno",
-					"direction": "N"
+					"direction": "NO"
 				},
 				"humidity": "95–100 %",
 				"precipitation": "snow"
@@ -283,7 +283,7 @@
 				"quality": "bueno",
 				"direction": "N"
 			},
-			"humidity": "95–100 %",
+			"humidity": "100–100 %",
 			"precipitation": "snow"
 		},
 		{
@@ -296,10 +296,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
+				"code": 4,
+				"range": "1–1,25\"",
+				"label": "aceptable",
+				"quality": "regular"
 			},
 			"transparency": {
 				"code": 5,
@@ -328,10 +328,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 2,
-				"range": "0,5–0,75\"",
-				"label": "muy bueno",
-				"quality": "bueno"
+				"code": 4,
+				"range": "1–1,25\"",
+				"label": "aceptable",
+				"quality": "regular"
 			},
 			"transparency": {
 				"code": 8,
@@ -343,7 +343,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "moderado",
+				"label": "viento moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -392,10 +392,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
+				"code": 4,
+				"range": "1–1,25\"",
+				"label": "aceptable",
+				"quality": "regular"
 			},
 			"transparency": {
 				"code": 8,
@@ -439,7 +439,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "moderado",
+				"label": "viento moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -595,13 +595,13 @@
 				"quality": "malo"
 			},
 			"obscured": true,
-			"temperature": 8,
+			"temperature": 6,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
 				"label": "moderado",
 				"quality": "bueno",
-				"direction": "N"
+				"direction": "NO"
 			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
@@ -627,7 +627,7 @@
 				"quality": "malo"
 			},
 			"obscured": true,
-			"temperature": 7,
+			"temperature": 6,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
