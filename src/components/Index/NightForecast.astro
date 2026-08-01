@@ -1,8 +1,8 @@
 ---
-import { HugeiconsIcon } from "@hugeicons/react";
-import { SunsetIcon, Moon02Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import forecast from "@/data/forecast.json";
 import { NightSegments } from "./NightSegments";
+import { NightBar, type NightTimes } from "./NightBar";
+import { MoonCard, type MoonInfo } from "./MoonCard";
 import { Phrase } from "@/components/Phrase";
 import type { NightSegment, Phrase as Parts } from "@/lib/sky";
 
@@ -19,6 +19,10 @@ const VERDICT = {
 
 const verdict = VERDICT[night.verdict as keyof typeof VERDICT] ?? VERDICT.malo;
 const impossible = night.verdict === "imposible";
+
+const whatsappHref = `https://wa.me/56988147137?text=${encodeURIComponent(
+	"Hola, me gustaría salir a observar esta noche. ¿Alcanzamos?",
+)}`;
 
 // En UTC a propósito: `new Date("2026-07-28")` retrocede un día en zonas negativas.
 const [year, month, day] = night.date.split("-").map(Number);
@@ -38,29 +42,6 @@ const updated = new Intl.DateTimeFormat("es-CL", {
 	hour12: false,
 }).format(new Date(generatedAt));
 
-const whatsappHref = `https://wa.me/56988147137?text=${encodeURIComponent(
-	"Hola, me gustaría salir a observar esta noche. ¿Alcanzamos?",
-)}`;
-
-// La interferencia es lo que decide, no el porcentaje: va nombrada y con color.
-const moonNote: Parts =
-	night.moon.interference === "alta"
-		? [
-				{ text: "Interferencia " },
-				{ text: "alta", quality: "malo" },
-				{ text: ": aclara el cielo y tapa los objetos más tenues." },
-			]
-		: night.moon.interference === "media"
-			? [
-					{ text: "Interferencia " },
-					{ text: "media", quality: "regular" },
-					{ text: ": molesta algo para galaxias y nebulosas." },
-				]
-			: [
-					{ text: "Interferencia " },
-					{ text: "baja", quality: "bueno" },
-					{ text: ": no estorba la observación." },
-				];
 ---
 
 <section id="pronostico" class="px-5 py-16">
@@ -88,113 +69,18 @@ const moonNote: Parts =
 			</p>
 		</div>
 
-		<dl class="mt-4 grid gap-3 sm:grid-cols-3">
-			<div class="flex items-center gap-3 rounded-2xl bg-card p-4 ring-1 ring-white/10">
-				<span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
-					<HugeiconsIcon icon={SunsetIcon} size={18} />
-				</span>
-				<div class="min-w-0">
-					<dt class="text-xs text-muted-foreground">Atardece</dt>
-					<dd class="font-medium tabular-nums">{night.sunset}</dd>
-				</div>
-			</div>
+		<div class="mt-5">
+			<NightBar
+				client:visible
+				night={night as unknown as NightTimes}
+				timeZone={forecast.site.timeZone}
+				impossible={impossible}
+				whatsappHref={whatsappHref}
+			/>
+		</div>
 
-			<div class="flex items-center gap-3 rounded-2xl bg-card p-4 ring-1 ring-white/10">
-				<span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
-					<HugeiconsIcon icon={Clock01Icon} size={18} />
-				</span>
-				<div class="min-w-0">
-					<dt class="text-xs text-muted-foreground">Cielo oscuro</dt>
-					<dd class="font-medium tabular-nums">{night.darkFrom} – {night.darkUntil}</dd>
-				</div>
-			</div>
-
-			<div class="flex items-center gap-3 rounded-2xl bg-card p-4 ring-1 ring-white/10">
-				<span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
-					<HugeiconsIcon icon={Moon02Icon} size={18} />
-				</span>
-				<div class="min-w-0">
-					<dt class="text-xs text-muted-foreground">Luna</dt>
-					<dd class="font-medium">
-						{night.moon.illumination}% <span class="text-xs font-normal text-muted-foreground">
-							{night.moon.label}</span
-						>
-					</dd>
-				</div>
-			</div>
-		</dl>
-
-		<p class="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
-			<Phrase parts={moonNote} />
-		</p>
-
-		{/* Sin JavaScript queda el estado "ok", que dice la hora tope. */}
-		<div
-			class="mt-2 text-center text-xs leading-relaxed text-muted-foreground"
-			data-deadline
-			data-deadline-at={night.bookingDeadlineAt}
-			data-night-date={night.date}
-			data-time-zone={forecast.site.timeZone}
-		>
-			<p data-deadline-state="ok">
-				{
-					impossible ? (
-						<>
-							Si el cielo cambia y se abre, avísanos antes de las{" "}
-							<span class="font-medium text-foreground tabular-nums">
-								{night.bookingDeadline}
-							</span>
-							.
-						</>
-					) : (
-						<>
-							Para salir esta noche, avísanos antes de las{" "}
-							<span class="font-medium text-foreground tabular-nums">
-								{night.bookingDeadline}
-							</span>
-							.
-						</>
-					)
-				}
-			</p>
-
-			<p data-deadline-state="late" hidden>
-				{
-					impossible ? (
-						<>
-							Con este cielo no hay salida esta noche.{" "}
-							<a
-								href={whatsappHref}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="font-medium text-primary underline underline-offset-4"
-							>
-								Escríbenos
-							</a>{" "}
-							y buscamos otra noche de tu estadía.
-						</>
-					) : (
-						<>
-							La hora recomendada para avisar era las{" "}
-							<span class="tabular-nums">{night.bookingDeadline}</span>.{" "}
-							<a
-								href={whatsappHref}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="font-medium text-primary underline underline-offset-4"
-							>
-								Escríbenos igual
-							</a>{" "}
-							y vemos si alcanzamos a preparar el equipo.
-						</>
-					)
-				}
-			</p>
-
-			<p data-deadline-state="stale" hidden>
-				Este pronóstico es de la noche del <span class="tabular-nums">{nightLabel}</span>.
-				Escríbenos y te contamos cómo se ve la de hoy.
-			</p>
+		<div class="mt-4">
+			<MoonCard moon={night.moon as MoonInfo} />
 		</div>
 
 		<div class="mt-8">
@@ -231,51 +117,3 @@ const moonNote: Parts =
 		</p>
 	</div>
 </section>
-
-<script>
-	const box = document.querySelector<HTMLElement>("[data-deadline]");
-
-	if (box) {
-		const deadline = Date.parse(box.dataset.deadlineAt ?? "");
-		const nightDate = box.dataset.nightDate ?? "";
-		const timeZone = box.dataset.timeZone ?? "America/Santiago";
-
-		// Siempre contra la hora del complejo, no la del dispositivo.
-		const dateFmt = new Intl.DateTimeFormat("en-CA", {
-			timeZone,
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-		});
-		const hourFmt = new Intl.DateTimeFormat("es-CL", {
-			timeZone,
-			hour: "2-digit",
-			hour12: false,
-		});
-
-		const show = (state: string) => {
-			box.querySelectorAll<HTMLElement>("[data-deadline-state]").forEach((node) => {
-				node.hidden = node.dataset.deadlineState !== state;
-			});
-		};
-
-		const update = () => {
-			const now = new Date();
-
-			// Antes del mediodía la noche vigente es la que empezó ayer.
-			const today = dateFmt.format(now);
-			const hour = Number(hourFmt.format(now));
-			const currentNight =
-				hour < 12 ? dateFmt.format(new Date(now.getTime() - 12 * 3600e3)) : today;
-
-			if (currentNight !== nightDate) return show("stale");
-			show(Number.isNaN(deadline) || now.getTime() <= deadline ? "ok" : "late");
-		};
-
-		update();
-		setInterval(update, 60_000);
-		document.addEventListener("visibilitychange", () => {
-			if (!document.hidden) update();
-		});
-	}
-</script>
