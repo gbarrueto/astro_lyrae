@@ -13,6 +13,7 @@ import {
 	type SkyEvent,
 } from "@/lib/sky";
 import { cn } from "@/lib/utils";
+import { Phrase } from "@/components/Phrase";
 import { Button } from "@/components/ui/button";
 import {
 	Popover,
@@ -155,7 +156,9 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 							</PopoverDescription>
 						</PopoverHeader>
 
-						<p className="text-sm leading-relaxed">{seeingMeaning(seeing, obscured)}</p>
+						<p className="text-sm leading-relaxed">
+								<Phrase parts={seeingMeaning(seeing, obscured)} />
+							</p>
 
 						<p className="text-xs leading-relaxed text-muted-foreground">
 							Hay más en{" "}

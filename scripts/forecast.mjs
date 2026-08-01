@@ -274,6 +274,11 @@ function verdictFor(segments) {
 	return RANK[scores[Math.floor(scores.length / 2)]];
 }
 
+/* Las frases viajan en piezas, no armadas: así la UI puede destacar el juicio
+   con el mismo color que ese dato lleva en su tarjeta. */
+const t = (text) => ({ text });
+const q = (text, quality) => ({ text, quality });
+
 /** Aviso aparte: el viento no entra en el veredicto pero sí cambia la salida. */
 function windWarningFor(segments) {
 	const windy = segments.filter((s) => s.wind && s.wind.quality === "malo");
@@ -282,31 +287,55 @@ function windWarningFor(segments) {
 	const worst = windy.reduce((a, b) => (b.wind.code > a.wind.code ? b : a));
 	const when = windy.length === segments.length ? "toda la noche" : `cerca de las ${worst.time}`;
 
-	return `Se espera viento ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
+	return [
+		t("Se espera viento "),
+		q(worst.wind.label, worst.wind.quality),
+		t(` ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`),
+	];
 }
 
 function headlineFor(verdict, segments, moon) {
 	const clear = segments.filter((s) => s.clouds.quality === "bueno");
 
 	if (verdict === "imposible") {
-		return "Cielo cubierto de punta a punta: esta noche no hay nada que observar.";
+		return [
+			t("Cielo "),
+			q("cubierto de punta a punta", "imposible"),
+			t(": esta noche no hay nada que observar."),
+		];
 	}
 
 	if (verdict === "malo") {
 		return clear.length > 0
-			? `Noche mayormente nublada, con un claro cerca de las ${clear[0].time}.`
-			: "Cielo cubierto durante toda la noche.";
+			? [
+					t("Noche "),
+					q("mayormente nublada", "malo"),
+					t(", con "),
+					q(`un claro cerca de las ${clear[0].time}`, "bueno"),
+					t("."),
+				]
+			: [t("Cielo "), q("cubierto", "malo"), t(" durante toda la noche.")];
 	}
 
 	if (verdict === "regular") {
-		return "Noche con nubes intermitentes: se puede observar, pero a ratos.";
+		return [
+			t("Noche con "),
+			q("nubes intermitentes", "regular"),
+			t(": se puede observar, pero a ratos."),
+		];
 	}
 
 	if (moon.interference === "alta") {
-		return `Cielo despejado, aunque la ${moon.label} va a aclarar el fondo y tapar los objetos más tenues.`;
+		return [
+			t("Cielo "),
+			q("despejado", "bueno"),
+			t(`, aunque la ${moon.label} va a `),
+			q("aclarar el fondo", "regular"),
+			t(" y tapar los objetos más tenues."),
+		];
 	}
 
-	return "Cielo despejado durante la mayor parte de la noche.";
+	return [t("Cielo "), q("despejado", "bueno"), t(" durante la mayor parte de la noche.")];
 }
 
 /* ------------------------------------------------------------------ *

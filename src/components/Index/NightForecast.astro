@@ -3,7 +3,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { SunsetIcon, Moon02Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import forecast from "@/data/forecast.json";
 import { NightSegments } from "./NightSegments";
-import type { NightSegment } from "@/lib/sky";
+import { Phrase } from "@/components/Phrase";
+import type { NightSegment, Phrase as Parts } from "@/lib/sky";
 
 const { night, model, generatedAt } = forecast;
 
@@ -41,12 +42,25 @@ const whatsappHref = `https://wa.me/56988147137?text=${encodeURIComponent(
 	"Hola, me gustaría salir a observar esta noche. ¿Alcanzamos?",
 )}`;
 
-const moonNote =
+// La interferencia es lo que decide, no el porcentaje: va nombrada y con color.
+const moonNote: Parts =
 	night.moon.interference === "alta"
-		? "Aclara el cielo y tapa los objetos más tenues."
+		? [
+				{ text: "Interferencia " },
+				{ text: "alta", quality: "malo" },
+				{ text: ": aclara el cielo y tapa los objetos más tenues." },
+			]
 		: night.moon.interference === "media"
-			? "Molesta algo para galaxias y nebulosas."
-			: "No interfiere con la observación.";
+			? [
+					{ text: "Interferencia " },
+					{ text: "media", quality: "regular" },
+					{ text: ": molesta algo para galaxias y nebulosas." },
+				]
+			: [
+					{ text: "Interferencia " },
+					{ text: "baja", quality: "bueno" },
+					{ text: ": no estorba la observación." },
+				];
 ---
 
 <section id="pronostico" class="px-5 py-16">
@@ -69,7 +83,9 @@ const moonNote =
 			>
 				{verdict.label}
 			</p>
-			<p class="mt-4 text-base leading-relaxed text-pretty">{night.headline}</p>
+			<p class="mt-4 text-base leading-relaxed text-pretty">
+				<Phrase parts={night.headline as Parts} />
+			</p>
 		</div>
 
 		<dl class="mt-4 grid gap-3 sm:grid-cols-3">
@@ -108,7 +124,9 @@ const moonNote =
 			</div>
 		</dl>
 
-		<p class="mt-3 text-center text-xs leading-relaxed text-muted-foreground">{moonNote}</p>
+		<p class="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
+			<Phrase parts={moonNote} />
+		</p>
 
 		{/* Sin JavaScript queda el estado "ok", que dice la hora tope. */}
 		<div
@@ -196,7 +214,7 @@ const moonNote =
 		{
 			night.windWarning && (
 				<p class="mt-4 rounded-2xl bg-card/60 p-4 text-xs leading-relaxed text-muted-foreground ring-1 ring-white/5">
-					{night.windWarning}
+					<Phrase parts={night.windWarning as Parts} />
 				</p>
 			)
 		}

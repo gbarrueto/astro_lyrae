@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-01T01:55:25.245Z",
+	"generatedAt": "2026-08-01T04:34:31.493Z",
 	"model": {
 		"name": "7Timer! ASTRO",
 		"basis": "GFS",
@@ -27,7 +27,18 @@
 			"set": "08:54"
 		},
 		"verdict": "imposible",
-		"headline": "Cielo cubierto de punta a punta: esta noche no hay nada que observar.",
+		"headline": [
+			{
+				"text": "Cielo "
+			},
+			{
+				"text": "cubierto de punta a punta",
+				"quality": "imposible"
+			},
+			{
+				"text": ": esta noche no hay nada que observar."
+			}
+		],
 		"windWarning": null,
 		"segments": [
 			{
@@ -132,38 +143,6 @@
 		]
 	},
 	"series": [
-		{
-			"at": "2026-07-31T21:00:00.000Z",
-			"time": "17:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
-			},
-			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
-			},
-			"obscured": true,
-			"temperature": 7,
-			"wind": {
-				"code": 2,
-				"range": "0,3–3,4 m/s",
-				"label": "brisa suave",
-				"quality": "bueno",
-				"direction": "NO"
-			},
-			"humidity": "95–100 %",
-			"precipitation": "rain"
-		},
 		{
 			"at": "2026-08-01T00:00:00.000Z",
 			"time": "20:00",
@@ -642,6 +621,38 @@
 				"direction": "N"
 			},
 			"humidity": "100–100 %",
+			"precipitation": "snow"
+		},
+		{
+			"at": "2026-08-02T21:00:00.000Z",
+			"time": "17:00",
+			"clouds": {
+				"code": 9,
+				"range": "94–100 %",
+				"label": "cubierto",
+				"quality": "malo"
+			},
+			"seeing": {
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
+			},
+			"transparency": {
+				"code": 8,
+				"label": "muy pobre",
+				"quality": "malo"
+			},
+			"obscured": true,
+			"temperature": 6,
+			"wind": {
+				"code": 2,
+				"range": "0,3–3,4 m/s",
+				"label": "brisa suave",
+				"quality": "bueno",
+				"direction": "E"
+			},
+			"humidity": "95–100 %",
 			"precipitation": "snow"
 		}
 	],
