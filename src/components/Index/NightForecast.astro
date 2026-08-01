@@ -10,21 +10,14 @@ const { night, model, generatedAt } = forecast;
 const anyObscured = night.segments.some((segment) => segment.obscured);
 
 const VERDICT = {
-	bueno: {
-		label: "Buena noche para observar",
-		chip: "text-emerald-300 ring-emerald-400/30 bg-emerald-400/10",
-	},
-	regular: {
-		label: "Noche irregular",
-		chip: "text-amber-300 ring-amber-400/30 bg-amber-400/10",
-	},
-	malo: {
-		label: "Mala noche para observar",
-		chip: "text-rose-300 ring-rose-400/30 bg-rose-400/10",
-	},
+	bueno: { label: "Buena noche para observar", chip: "text-good ring-good/30 bg-good/10" },
+	regular: { label: "Noche irregular", chip: "text-warn ring-warn/30 bg-warn/10" },
+	malo: { label: "Mala noche para observar", chip: "text-bad ring-bad/30 bg-bad/10" },
+	imposible: { label: "No se puede observar", chip: "text-off ring-off/30 bg-off/10" },
 } as const;
 
-const verdict = VERDICT[night.verdict as keyof typeof VERDICT];
+const verdict = VERDICT[night.verdict as keyof typeof VERDICT] ?? VERDICT.malo;
+const impossible = night.verdict === "imposible";
 
 // En UTC a propósito: `new Date("2026-07-28")` retrocede un día en zonas negativas.
 const [year, month, day] = night.date.split("-").map(Number);
@@ -126,21 +119,58 @@ const moonNote =
 			data-time-zone={forecast.site.timeZone}
 		>
 			<p data-deadline-state="ok">
-				Para salir esta noche, avísanos antes de las <span
-					class="font-medium text-foreground tabular-nums">{night.bookingDeadline}</span
-				>.
+				{
+					impossible ? (
+						<>
+							Si el cielo cambia y se abre, avísanos antes de las{" "}
+							<span class="font-medium text-foreground tabular-nums">
+								{night.bookingDeadline}
+							</span>
+							.
+						</>
+					) : (
+						<>
+							Para salir esta noche, avísanos antes de las{" "}
+							<span class="font-medium text-foreground tabular-nums">
+								{night.bookingDeadline}
+							</span>
+							.
+						</>
+					)
+				}
 			</p>
 
 			<p data-deadline-state="late" hidden>
-				La hora recomendada para avisar era las <span class="tabular-nums"
-					>{night.bookingDeadline}</span
-				>. <a
-					href={whatsappHref}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="font-medium text-primary underline underline-offset-4"
-					>Escríbenos igual</a
-				> y vemos si alcanzamos a preparar el equipo.
+				{
+					impossible ? (
+						<>
+							Con este cielo no hay salida esta noche.{" "}
+							<a
+								href={whatsappHref}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="font-medium text-primary underline underline-offset-4"
+							>
+								Escríbenos
+							</a>{" "}
+							y buscamos otra noche de tu estadía.
+						</>
+					) : (
+						<>
+							La hora recomendada para avisar era las{" "}
+							<span class="tabular-nums">{night.bookingDeadline}</span>.{" "}
+							<a
+								href={whatsappHref}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="font-medium text-primary underline underline-offset-4"
+							>
+								Escríbenos igual
+							</a>{" "}
+							y vemos si alcanzamos a preparar el equipo.
+						</>
+					)
+				}
 			</p>
 
 			<p data-deadline-state="stale" hidden>

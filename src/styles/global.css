@@ -41,6 +41,7 @@
     --color-background: var(--background);
     /* Semáforo de condiciones y escala térmica: ver bloque en :root */
     --color-good: var(--good);
+    --color-off: var(--off);
     --color-warn: var(--warn);
     --color-bad: var(--bad);
     --color-temp-freezing: var(--temp-freezing);
@@ -106,6 +107,8 @@
     /* Semáforo de condiciones. El ámbar de aviso se corre hacia el amarillo
        para no confundirse con el ámbar de marca, que significa otra cosa. */
     --good: oklch(0.8 0.15 155);
+    /* "no se puede": ausencia, no alarma */
+    --off: oklch(0.76 0.03 260);
     --warn: oklch(0.86 0.15 95);
     --bad: oklch(0.68 0.19 22);
 

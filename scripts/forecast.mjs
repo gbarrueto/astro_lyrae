@@ -267,6 +267,8 @@ const RANK = ["bueno", "regular", "malo"];
 /** Manda la nubosidad; el resto matiza el texto, no el veredicto. */
 function verdictFor(segments) {
 	if (segments.length === 0) return "malo";
+	// Cubierto de punta a punta (81 % o más en todos los tramos): no hay ventana.
+	if (segments.every((s) => (s.clouds?.code ?? 0) >= 8)) return "imposible";
 	const scores = segments.map((s) => WORST[s.clouds.quality]).sort((a, b) => a - b);
 	// La mediana evita que una sola hora mala condene una noche entera.
 	return RANK[scores[Math.floor(scores.length / 2)]];
@@ -285,6 +287,10 @@ function windWarningFor(segments) {
 
 function headlineFor(verdict, segments, moon) {
 	const clear = segments.filter((s) => s.clouds.quality === "bueno");
+
+	if (verdict === "imposible") {
+		return "Cielo cubierto de punta a punta: esta noche no hay nada que observar.";
+	}
 
 	if (verdict === "malo") {
 		return clear.length > 0
