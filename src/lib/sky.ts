@@ -47,7 +47,12 @@ export const QUALITY_TONE: Record<string, string> = {
 	bueno: "text-good",
 	regular: "text-warn",
 	malo: "text-bad",
+	imposible: "text-off",
 };
+
+/** Frase en piezas: las que llevan `quality` se destacan con su color. */
+export type PhrasePart = { text: string; quality?: string };
+export type Phrase = PhrasePart[];
 
 /** Cortes pensados para una noche de precordillera, no para un informe. */
 export function temperatureTone(celsius: number): string {
@@ -62,22 +67,27 @@ export function temperatureTone(celsius: number): string {
 export function seeingMeaning(
 	seeing: { label: string; range: string; quality: string } | null,
 	obscured: boolean,
-): string {
-	if (!seeing) return "Todavía no tenemos el dato para esta hora.";
+): Phrase {
+	if (!seeing) return [{ text: "Todavía no tenemos el dato para esta hora." }];
+
+	const value = { text: `${seeing.label} (${seeing.range})`, quality: seeing.quality };
 
 	if (obscured) {
-		return `El pronóstico marca un seeing ${seeing.label} (${seeing.range}), pero esta noche está nublado.`;
+		return [
+			{ text: "El pronóstico marca un seeing " },
+			{ ...value, quality: "imposible" },
+			{ text: ", pero esta noche está nublado." },
+		];
 	}
 
-	if (seeing.quality === "bueno") {
-		return `Esta noche está ${seeing.label} (${seeing.range}): buena para mirar planetas y detalle fino, como los anillos de Saturno o los cráteres de la Luna.`;
-	}
+	const tail =
+		seeing.quality === "bueno"
+			? ": buena para mirar planetas y detalle fino, como los anillos de Saturno o los cráteres de la Luna."
+			: seeing.quality === "regular"
+				? ": se observa bien, pero los objetos más pequeños se van a ver algo temblorosos."
+				: ": la imagen va a temblar bastante, así que conviene apuntar a objetos grandes antes que a planetas.";
 
-	if (seeing.quality === "regular") {
-		return `Esta noche está ${seeing.label} (${seeing.range}): se observa bien, pero los objetos más pequeños se van a ver algo temblorosos.`;
-	}
-
-	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes antes que a planetas.`;
+	return [{ text: "Esta noche está " }, value, { text: tail }];
 }
 
 /** Sigla de origen del viento → hacia dónde apunta la flecha, y su nombre. */

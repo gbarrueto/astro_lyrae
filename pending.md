@@ -62,7 +62,30 @@ Agregar a `src/lib/services.ts`:
 
 ---
 
-## Navegación ✅
+## Navegación
+
+### Saltos hacia el pronóstico
+
+*(fricción #4 del recorrido de visitante, semilla 330439)*
+
+Para una huésped que llega desde el mensaje de bienvenida, *"¿se puede hoy?"* es
+**la** pregunta, y el pronóstico está en la cuarta pantalla. Peor: el punto 01 de
+"Deberías saber" le dice literalmente *"Revisa el pronóstico del tiempo"* y no
+hay ningún enlace que la lleve ahí; el texto solo menciona que está "más abajo".
+
+El ancla `#pronostico` ya existe y funciona, así que esto es agregar enlaces, no
+construir nada.
+
+- **Desde `GoodToKnow.astro`**: el punto 01 debería enlazar a `#pronostico`, y el
+  punto 03 —el de seeing— también, ya que remata con "más abajo puedes ver cómo
+  se espera que esté".
+- **Desde el navbar**: hoy los enlaces a `/#pronostico` y `/#deberias-saber`
+  existen pero viven **dentro del popover de `SkyStatus`**, o sea escondidos tras
+  un botón que dice "Seeing" —una palabra que el visitante sin astronomía no
+  entiende y no se atreve a tocar. El icono de cielo y la temperatura de la barra
+  son el lugar natural para un salto directo al pronóstico.
+- Ojo con el `scroll-behavior: smooth` del sitio y la barra fija: el destino
+  necesita `scroll-margin-top` para que el título no quede debajo de la barra.
 
 ### Salida al final de las fichas de servicio ✅
 
@@ -96,6 +119,113 @@ Por qué así y no lo otro:
 ---
 
 ## Pronóstico
+
+### Mostrar más de una noche
+
+*(fricción #1 del recorrido de visitante, semilla 330439)*
+
+La visitante llevaba tres noches por delante y el sitio solo le mostró una. Peor:
+el propio bloque le ofrece *"Escríbenos y buscamos otra noche de tu estadía"* y
+acto seguido no le muestra ninguna otra noche. Se fue sin poder escribir, porque
+para escribir necesitaba saber qué noche pedir.
+
+Es la fricción de mayor valor del recorrido: convierte un `CUMPLIDO CON
+DIFICULTAD` en `OBJETIVO CUMPLIDO`, y además ataca el caso más común —el huésped
+tiene varias noches y solo necesita elegir cuál.
+
+- Ver primero **hasta dónde llega 7Timer**: el endpoint `astro` entrega puntos
+  cada 3 horas, y hay que confirmar cuántos días cubre antes de diseñar nada.
+  `scripts/forecast.mjs` hoy se queda con la noche vigente y descarta el resto.
+- Si 7Timer no alcanza, evaluar **una segunda fuente solo para el resumen** de
+  las noches siguientes: nubosidad y poco más. No hace falta seeing ni
+  transparencia para decir "el domingo se ve mejor" — el detalle completo puede
+  seguir siendo solo de la noche vigente.
+- Cuidado con el peso visual: la tarjeta actual ya es densa. Las noches
+  siguientes probablemente quieran ser una fila compacta ("sáb 2: despejado ·
+  dom 3: nublado") que al tocarla abra el detalle, no tres tarjetas completas.
+
+### La noche cruza medianoche: mostrar los dos días
+
+*(fricción #2 del mismo recorrido)*
+
+El encabezado dice *"Pronóstico para la noche del viernes, 31 de julio"*, pero la
+visitante lo leyó a la 01:10 del sábado 1 y al pie decía *"Actualizado el 1/8,
+00:34"*. No supo si le estaban mostrando la noche que terminaba o la que venía.
+
+Una noche de observación abarca dos fechas de calendario —empieza el viernes y
+termina el sábado a las 06:16, como dice el propio bloque "Cielo oscuro 19:29 –
+06:16"—, así que nombrarla con un solo día es ambiguo justo para quien la está
+viviendo.
+
+- Nombrar el rango, no el día: "la noche del viernes 31 al sábado 1".
+- Es la misma raíz que el punto siguiente: pasada la medianoche, el sitio se
+  desincroniza de quien lo está mirando. Conviene resolverlos juntos.
+
+### No abrir en un tramo de hora que ya pasó
+
+*(fricción #3 del mismo recorrido)*
+
+A la 01:10 la tarjeta venía abierta en "Anochecer · 20:00", un tramo que había
+ocurrido cinco horas antes. La visitante lo notó de inmediato y le restó
+credibilidad al resto del bloque.
+
+- **Desactivar** los tramos ya pasados, o al menos marcarlos, y **seleccionar por
+  defecto el siguiente que queda**.
+- Si ya pasaron todos (mirando a las 05:00), el bloque no debería insistir con
+  esta noche: ahí es donde engancha con "mostrar más de una noche".
+- Comparar contra la hora del complejo, no la del dispositivo — mismo criterio
+  que se usó para el plazo de aviso.
+
+### Explicar qué efecto tiene cada dato, no solo su valor
+
+*(fricción #5 del mismo recorrido y del anterior)*
+
+La tarjeta entrega Seeing, Transparencia, Temperatura, Viento y Humedad como
+cifras sueltas. Para un visitante sin astronomía son una caja negra: sabe que
+`Transparencia: muy pobre` es malo porque está tachado, pero no qué le cambia a
+*su* noche. El seeing ya tiene su explicación en el popover de la barra y funcionó
+bien; el resto no tiene nada.
+
+Lo que hay que decir de cada uno es **qué se ve distinto y cómo se pasa la noche**:
+
+- **Transparencia** — cuántos objetos tenues alcanzas a ver; con mala, la Vía
+  Láctea se apaga aunque el cielo esté despejado.
+- **Temperatura** — cuánto hay que abrigarse para estar dos horas quieto de
+  noche. Es la pregunta práctica, no el número.
+- **Viento** — arruina la exposición larga (fotografía) y hace tiritar al grupo;
+  ya existe `night.windWarning` para el caso fuerte.
+- **Humedad** — empaña la óptica y baja la sensación térmica bastante más que lo
+  que dice el termómetro.
+
+Sirve el mismo patrón del seeing: `Popover` o `Tooltip` en el término, con una
+frase en lenguaje llano. Enlaza con el punto 5 de "Sacarle provecho a shadcn".
+
+### Humedad: el rango degenerado y de qué es el porcentaje
+
+*(fricción #6 del recorrido de visitante, semilla 330439)*
+
+Dos cosas distintas en el mismo dato.
+
+**1. `100–100 %` se lee como un descuido.** `humidityRange()` en
+`scripts/forecast.mjs:101` calcula `low` y `high` a partir de `rh2m`, y en el
+tope de la escala los dos topan en 100, así que imprime un rango de 100 a 100.
+Cuando ambos extremos coinciden hay que mostrar **`100 %`** a secas. Es el único
+rango calculado del pronóstico: los de nubosidad vienen de la tabla `CLOUDS` con
+los tramos escritos a mano, así que no degeneran.
+
+**2. ¿Humedad respecto de qué?** Es **humedad relativa a 2 m del suelo** (`rh2m`
+de 7Timer): qué porcentaje del vapor de agua que el aire puede sostener *a esa
+temperatura* ya está presente. Por eso 100 % no significa "está lloviendo" sino
+**aire saturado**, y ahí está lo que importa para observar:
+
+- A 100 % el aire está en el punto de rocío: **se empaña la óptica**, y con 6 °C
+  puede llegar a escarcharse. Es la diferencia entre una salida cómoda y estar
+  secando el ocular cada diez minutos.
+- Baja la sensación térmica bastante más de lo que dice el termómetro, que es la
+  pregunta práctica de quien va a estar dos horas quieto de noche.
+
+Ese "respecto de qué" es exactamente el vacío del pendiente anterior: el número
+solo no dice nada si no se sabe contra qué se mide. Van juntos.
 
 ### Avisar cuando la hora de aviso ya pasó ✅
 
@@ -162,6 +292,23 @@ pregunta práctica de quien sale dos horas a estar quieto de noche.
 
 ## Barra superior
 
+### Icono del botón de seeing: interrogación, no exclamación
+
+*(a raíz del recorrido de visitante, semilla 330439)*
+
+El botón usa `InformationCircleIcon` de hugeicons (`SkyStatus.tsx:147`), que se
+lee como un signo de admiración —aviso, algo va mal— cuando lo que hace en
+realidad es explicar un término. Un signo de interrogación comunica "acá te
+resuelvo la duda", que es exactamente lo que pasa al tocarlo.
+
+Importa más de lo que parece: para el visitante sin astronomía, "Seeing" es una
+palabra en inglés sin significado, y el icono es la única pista de que ahí hay
+una explicación y no una alerta. En el recorrido, tocarlo fue el momento en que
+el término dejó de ser ruido.
+
+- Candidato en el set instalado: `HelpCircleIcon` / `QuestionMarkIcon` de
+  `@hugeicons/core-free-icons`.
+
 ### Dibujos definitivos de los iconos de cielo
 
 La composición por capas ya funciona y está enchufada, pero los 16 archivos de
@@ -183,10 +330,11 @@ toca código.
 ### Sacarle provecho a shadcn
 
 El proyecto tiene shadcn configurado (base-ui, estilo `maia`, iconos hugeicons)
-y hasta ahora solo usa `button`, `card`, `carousel`, `aspect-ratio` y `popover`.
-Buena parte de la interfaz son `div` con `ring-1` y `rounded-2xl` escritos a
-mano, que es justo lo que los componentes ya resuelven —y con estados de foco y
-accesibilidad incluidos.
+y `src/components/ui/` solo tiene cuatro componentes instalados: `button`,
+`carousel`, `popover` y `tabs` (este último llegó con el control de horas del
+pronóstico). Buena parte de la interfaz son `div` con `ring-1` y `rounded-2xl`
+escritos a mano, que es justo lo que los componentes ya resuelven —y con estados
+de foco y accesibilidad incluidos.
 
 Ordenado por lo que más rinde:
 
@@ -201,7 +349,8 @@ Ordenado por lo que más rinde:
 4. **`Separator`** en vez de los `border-t` repartidos por las tarjetas.
 5. **`Tooltip` o `Popover` en el resto de los términos técnicos.** El seeing ya
    lo tiene en la barra; transparencia, apertura y relación focal siguen sin
-   explicación en el punto donde aparecen.
+   explicación en el punto donde aparecen. Es el vehículo del pendiente
+   "Explicar qué efecto tiene cada dato" de la sección Pronóstico.
 
 Discutible y por eso al final: **`Tabs` en la ficha de servicio** para separar
 experiencia / equipamiento / antes de reservar. Acortaría mucho la página, pero
@@ -211,12 +360,33 @@ antes.
 
 ---
 
-## Herramientas
+## Herramientas ✅
 
-### Reemplazar el capturador del recorrido simulado
+### Reemplazar el capturador del recorrido simulado ✅
 
 *(a raíz del recorrido de visitante — fricciones #1, #6 y #8 resultaron ser
 artefactos de la herramienta, no del sitio)*
+
+> **Hecho.** `screens.sh` se reemplazó por `scripts/visita.mjs`, que pilotea Edge
+> por el protocolo de DevTools (`localhost:9222`) sin dependencias: Node ya trae
+> `WebSocket`. Órdenes: `abrir`, `ver`, `tocar`, `deslizar`, `mirar`, `auditar`,
+> `cerrar`. La pestaña sobrevive entre órdenes.
+>
+> El ciclo completo bajó de ~2 min a **7 s**. El viewport de 390 px ahora es real
+> (`Emulation.setDeviceMetricsOverride`), así que se fue el iframe y con él la
+> franja gris y el fantasma bajo la barra. El recorrido **interactúa**: taps
+> táctiles de verdad, swipe para el carrusel y popovers que se abren — el control
+> de horas y el popover del seeing antes no se evaluaban nunca.
+>
+> Lo que más rinde no es la velocidad sino la separación entre **hechos** y
+> **percepción**: `auditar` verifica consola, red, status de cada enlace,
+> desborde y anclas, y el visitante solo puede afirmar que algo está roto si eso
+> lo confirma. `ver` entrega el texto en orden de lectura, que es lo que una
+> persona escanea, a una fracción del costo de leer capturas.
+>
+> `ver` agrupa por caja de layout y no por etiquetas, así que sobrevive a que se
+> rediseñe una sección; `auditar` incluye una línea de control («texto en
+> pantalla que ver no recoge») que delata si el lector se queda atrás.
 
 `.claude/skills/visitante/scripts/screens.sh` maneja Edge headless desde WSL con
 un iframe para forzar el viewport. Es lento (~10 s por captura, ~3 min por

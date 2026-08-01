@@ -6,17 +6,32 @@ description: Simula a una persona que visita el sitio por primera vez y reporta 
 # Visitante
 
 Actúas como una persona real que abre este sitio por primera vez, con un perfil
-sorteado al azar. Recorres el sitio mirando **capturas de pantalla reales** y
-reportas la experiencia en primera persona.
+sorteado al azar. Recorres el sitio **tocándolo de verdad** — el navegador
+responde a tus toques — y reportas la experiencia en primera persona.
 
 ## Regla central
 
-**Durante el recorrido no sabes nada del código.** No has leído los `.astro`, no
-sabes que `Seeing` está sin portar ni que falta la ruta `/service/[id]`. Solo
-existe lo que se ve en las capturas. Si algo se ve raro, tu reacción es la de un
-turista confundido, no la de un desarrollador diagnosticando.
+**Durante el recorrido no sabes nada del código.** No has leído los `.astro`.
+Solo existe lo que la página te muestra. Si algo se ve raro, tu reacción es la
+de un turista confundido, no la de un desarrollador diagnosticando.
 
 No arregles nada. Esta skill solo observa y reporta.
+
+## La separación que evita falsos positivos
+
+Hay dos fuentes de información y **no se mezclan**:
+
+- **Hechos** — lo que `visita.mjs auditar` verifica: errores de consola,
+  peticiones caídas, el status real de cada enlace, desborde horizontal medido,
+  anclas rotas. Esto es objetivo.
+- **Percepción** — lo que tú, como visitante, entiendes o no entiendes.
+  Subjetivo, y ahí está el valor de la skill.
+
+**Solo puedes afirmar que algo está roto si `auditar` lo confirma.** Si algo te
+parece roto y no aparece en los hechos, dilo como percepción ("me pareció que
+no cargaba", "creí que el botón estaba muerto") — que suele ser un hallazgo
+mejor todavía, porque la sensación de rotura sin rotura real es un problema de
+diseño.
 
 ## Pasos
 
@@ -53,8 +68,7 @@ El rasgo **Etapa** manda sobre los demás:
 - `RESERVADO` — ya reservó pero no ha viajado. Puede contratar, pero decide con
   semanas de anticipación: el pronóstico de esta noche no le sirve de nada.
 - `EVALUANDO` — todavía no arrienda. El sitio funciona como argumento de venta
-  del complejo; su pregunta de fondo es "¿esto justifica arrendar acá?", y
-  necesita un camino de vuelta a reservar cabaña que hoy no existe.
+  del complejo; su pregunta de fondo es "¿esto justifica arrendar acá?".
 - `EXTERNO` — **no puede contratar**, y el sitio no se lo dice en ninguna parte.
   Su recorrido termina en un malentendido: llega hasta el WhatsApp creyendo que
   puede reservar un tour suelto. Repórtalo como tal.
@@ -65,69 +79,104 @@ su horizonte ("¿cómo sabré qué noche va a estar despejada cuando esté allá
 
 Muestra el perfil completo al usuario antes de empezar.
 
-### 2. Abrir el sitio
+### 2. Abrir el sitio y recoger los hechos
 
 Verifica el dev server (`astro dev status`; si no corre, `astro dev --background`).
-Luego captura la secuencia de pantallas:
 
 ```bash
-.claude/skills/visitante/scripts/screens.sh visita / 390 844
+V=.claude/skills/visitante/scripts/visita.mjs
+node $V abrir /                          # móvil (390×844) por defecto
+node $V abrir / --ancho=1280 --alto=800  # si el perfil dice notebook
+node $V auditar                          # los hechos verificables
 ```
 
-- Argumentos: `<nombre> [ruta] [ancho] [alto]`. Ancho/alto por defecto = móvil
-  (390×844). Si el perfil dice notebook, usa `1280 800`.
-- Imprime en stderr el viewport medido, el `scrollWidth` y la altura del
-  documento, y avisa si hay desbordamiento horizontal **real**.
-- Tarda ~10 s por pantalla. Una página larga son ~8 capturas.
-- Cada PNG es una parada de scroll, en orden. La franja gris a la derecha es el
-  marco del capturador, no parte del sitio: ignórala.
+`auditar` tarda ~3 s y recarga la página recorriéndola entera. Guarda su salida:
+es tu única autoridad sobre qué está realmente roto. **Léela fuera de personaje
+y no la cites en el relato** — el visitante no ve errores de consola.
 
-Lee las capturas **en orden, una por una**, como quien baja con el pulgar.
+Con `--sin-recargar` audita la página tal como está en ese momento, con lo que
+hayas abierto o tocado; a cambio pierde los sucesos de carga.
 
-### 3. Seguir los enlaces
-
-Un visitante hace clic. Antes de reaccionar a un enlace interno, comprueba a
-dónde lleva de verdad:
+### 3. Recorrer
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' http://localhost:4321/service/eaa
+node $V ver                  # todo el texto visible, en orden de lectura
+node $V ver --hasta=1700     # solo las dos primeras pantallas
 ```
 
-Si devuelve 404, eso es lo que le pasa a la persona: hizo clic y se topó con un
-error. Reacciona como tal (desconcierto, desconfianza, abandono), no como quien
-sabe que la ruta está pendiente. Si el enlace lleva a otra página del sitio,
-captúrala con `screens.sh` y sigue el recorrido ahí.
+Cada línea es `altura-en-el-documento  etiqueta [marcas] :: texto`, y una marca
+señala el pliegue. Eso es lo que una persona escanea: **léelo de arriba abajo y
+detente donde se detendría ella**, no leas la página entera antes de opinar.
+
+Las marcas `[ACTIVO]`, `[ABIERTO]`, `[DESACTIVADO]` y el `href` de cada enlace
+te dicen el estado de los controles. Lo que no aparece en `ver` es porque no se
+ve: si un texto está tapado o recortado, para el visitante no existe.
+
+### 4. Tocar
+
+Un visitante toca cosas. Ahora puedes:
+
+```bash
+node $V tocar "02:00"              # por texto exacto del control
+node $V tocar "Ir a la imagen 2"   # o por su aria-label
+node $V tocar "#contacto"          # o por selector CSS
+node $V deslizar izq --sel='[data-slot="carousel"]'   # gesto de swipe
+```
+
+Cada orden imprime **qué cambió** en la página: `−` lo que desapareció, `+` lo
+que apareció. Si dice "no cambió nada de lo visible", esa es exactamente la
+experiencia de la persona: tocó y no pasó nada.
+
+Toca lo que tocaría tu perfil, no todo. Y si un enlace lleva a otra página,
+`abrir` esa ruta y sigue el recorrido ahí — si se cae, lo vives como un error,
+no como una ruta pendiente.
 
 Los enlaces externos (WhatsApp, Instagram, meteoblue) **no se abren**. Solo
 comenta si el destino es claro y si el visitante se atrevería a tocarlo.
 
-### 4. Reportar
+### 5. Mirar (con moderación)
+
+El texto ya te dice qué dice la página. Usa capturas solo cuando la pregunta sea
+**visual**: jerarquía, apretujamiento, si algo se ve pobre o roto.
+
+```bash
+node $V mirar --y=0 --nombre=llegada        # una pantalla concreta
+node $V mirar --sel='#pronostico' --nombre=tarjeta   # una sección
+node $V mirar --nombre=todo                 # la página entera
+```
+
+Dos o tres capturas por recorrido, no diez. Los archivos quedan en
+`/mnt/c/Users/Public/astshots/`.
+
+### 6. Reportar
 
 Formato de salida, en español, en este orden:
 
 **Perfil** — el bloque del script, tal cual.
 
-**Recorrido** — una entrada por pantalla, en primera persona y en presente:
-qué ve, qué piensa, qué hace. Corto y concreto. Incluye los tiempos muertos
-("esto lleva rato cargando") y lo que se saltea sin leer. Marca la pantalla
-exacta donde el objetivo se cumple, o donde se rompe la paciencia.
+**Recorrido** — una entrada por momento, en primera persona y en presente: qué
+ve, qué piensa, qué toca, qué pasa al tocarlo. Corto y concreto. Incluye lo que
+se saltea sin leer. Marca el momento exacto donde el objetivo se cumple, o donde
+se rompe la paciencia.
 
 **Veredicto** — exactamente uno de estos tres, con una frase de justificación:
 - `OBJETIVO CUMPLIDO` — consiguió lo que venía a buscar.
 - `CUMPLIDO CON DIFICULTAD` — lo consiguió, pero con dudas, retrocesos o suerte.
-- `ABANDONO` — se fue. Di en qué pantalla y qué fue lo último que intentó.
+- `ABANDONO` — se fue. Di en qué punto y qué fue lo último que intentó.
 
-**Fricciones** — ordenadas de peor a menor. Cada una con: qué pasó, en qué
-pantalla, y la cita textual de lo que pensó el visitante. Sin proponer solución
-todavía.
+**Fricciones** — ordenadas de peor a menor. Cada una con: qué pasó, dónde, y la
+cita textual de lo que pensó el visitante. Marca cada una como `[hecho]` si
+`auditar` la confirma o `[percepción]` si no. Sin proponer solución todavía.
 
 **Lo que sí funcionó** — dos o tres cosas, concretas. No es relleno: sirve para
 no romperlas después.
 
 **Notas para el desarrollador** *(fuera de personaje, al final, breve)* — aquí sí
-puedes usar lo que sabes del proyecto: qué fricción es un bug real, cuál es una
-sección aún sin portar, y cuáles valdría la pena atacar primero. Máximo cinco
-líneas. Sin escribir código.
+puedes usar lo que sabes del proyecto y los hechos de `auditar`: qué fricción es
+un bug real, cuál es una sección aún sin portar, y cuáles valdría la pena atacar
+primero. Máximo cinco líneas. Sin escribir código.
+
+Al terminar: `node $V cerrar`.
 
 ## Sesgos que debes mantener
 
@@ -156,12 +205,36 @@ líneas. Sin escribir código.
   duda sobre horarios o duración se resuelve a favor de la tinaja: ya está al
   lado de la cabaña y no hay que coordinarla con nadie.
 
-## Límites conocidos
+## Cómo funciona por dentro
 
-Las capturas son estáticas: no hay clic, hover ni scroll dentro de un carrusel.
-Para ver otro estado (otra página, otro ancho), vuelve a correr `screens.sh`.
-Bajo la barra superior fija suele quedar un fantasma de texto: es un artefacto
-del capturador (el `backdrop-blur` compuesto en headless), no un defecto del
-sitio. No lo reportes.
-El capturador deja temporalmente `public/__visita_tmp__/` y lo borra al terminar;
-los PNG quedan en `/mnt/c/Users/Public/astshots/`.
+`visita.mjs` pilotea Edge por el protocolo de DevTools (`localhost:9222`), sin
+dependencias: Node ya trae `WebSocket`. La pestaña queda viva entre órdenes, así
+que `abrir` una vez y después `ver`/`tocar`/`mirar` operan sobre la misma página
+con su estado acumulado.
+
+El viewport de 390 px es real (`Emulation.setDeviceMetricsOverride`), no una
+ventana recortada, así que un desborde horizontal que reporte `auditar` es
+genuino. En móvil los toques son eventos táctiles de verdad, que es lo único que
+reconocen el carrusel y los controles.
+
+Si algo se comporta raro, `node $V cerrar --todo` mata el navegador y la
+siguiente orden lo levanta limpio.
+
+## Si cambias la UI de una sección
+
+`ver` no depende del markup: agrupa el texto por **caja de layout**, no por una
+lista de etiquetas. Rediseñar una sección —pasar de `<dl>/<dt>/<dd>` a divs y
+spans, por ejemplo— no le hace perder contenido; como mucho cambia cómo agrupa
+las líneas. Medido: sobre ese mismo rediseño, un lector basado en etiquetas
+perdía 20 fragmentos ("Escala Bortle", "Atardece", "17:59"); este pierde 0.
+
+Por si acaso, `auditar` incluye la línea **«texto en pantalla que ver no
+recoge»**. Si algún día deja de ser 0, el lector se quedó atrás respecto del
+sitio y hay que arreglarlo antes de fiarse de un recorrido: un visitante no
+puede reportar como ausente algo que sí está en pantalla.
+
+Lo que sí queda atado a la UI concreta son los **ejemplos** de este archivo:
+`tocar "02:00"`, `--sel='#pronostico'`, `[data-slot="carousel"]`. Si renombras
+un id o cambias las horas, esas órdenes fallan en voz alta ("no encontré nada
+que tocar…", "no existe #pronostico") — nunca en silencio. Ajusta el ejemplo y
+sigue; no hay nada más que tocar en el script.

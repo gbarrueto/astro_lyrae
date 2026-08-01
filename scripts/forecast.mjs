@@ -198,11 +198,57 @@ function nightWindow(now) {
 	};
 }
 
+/**
+ * Tramos con luz de luna dentro de la ventana observable.
+ *
+ * Los eventos de salida y puesta se piden por día calendario, así que una luna
+ * que sale pasada la medianoche no aparece en el día de la noche: hay que mirar
+ * los días vecinos y, además, saber si ya venía sobre el horizonte al oscurecer.
+ */
+function moonlitSpans(window) {
+	const events = [];
+	for (let offset = -1; offset <= 1; offset++) {
+		const times = SunCalc.getMoonTimes(
+			atLocalHour(addDays(window.date, offset), 12),
+			SITE.lat,
+			SITE.lon,
+			true,
+		);
+		if (times.rise) events.push({ at: times.rise, type: "rise" });
+		if (times.set) events.push({ at: times.set, type: "set" });
+	}
+
+	const seen = new Set();
+	const inside = events
+		.filter((e) => {
+			const key = `${e.type}-${e.at.getTime()}`;
+			if (seen.has(key) || e.at <= window.darkFrom || e.at >= window.darkUntil) return false;
+			seen.add(key);
+			return true;
+		})
+		.sort((a, b) => a.at - b.at);
+
+	const spans = [];
+	let start = SunCalc.getMoonPosition(window.darkFrom, SITE.lat, SITE.lon).altitude > 0
+		? window.darkFrom
+		: null;
+
+	for (const event of inside) {
+		if (event.type === "rise" && !start) start = event.at;
+		else if (event.type === "set" && start) {
+			spans.push({ from: start, to: event.at });
+			start = null;
+		}
+	}
+	if (start) spans.push({ from: start, to: window.darkUntil });
+
+	return spans;
+}
+
 /** Qué tan molesta va a estar la luna durante la ventana observable. */
 function moonReport(window) {
 	const mid = new Date((window.darkFrom.getTime() + window.darkUntil.getTime()) / 2);
 	const { fraction, phase } = SunCalc.getMoonIllumination(mid);
-	const times = SunCalc.getMoonTimes(window.sunset, SITE.lat, SITE.lon, true);
 
 	const names = [
 		"luna nueva",
@@ -220,12 +266,26 @@ function moonReport(window) {
 	// para tapar galaxias y nebulosas tenues. Los planetas no sufren.
 	const interference = fraction > 0.66 ? "alta" : fraction > 0.33 ? "media" : "baja";
 
+	const spans = moonlitSpans(window);
+	const rise = spans.find((s) => s.from > window.darkFrom)?.from ?? null;
+	const set = spans.find((s) => s.to < window.darkUntil)?.to ?? null;
+
 	return {
 		illumination: Math.round(fraction * 100),
+		phase: Number(phase.toFixed(3)),
 		label,
 		interference,
-		rise: times.rise ? localTime(times.rise) : null,
-		set: times.set ? localTime(times.set) : null,
+		rise: rise ? localTime(rise) : null,
+		riseAt: rise ? rise.toISOString() : null,
+		set: set ? localTime(set) : null,
+		setAt: set ? set.toISOString() : null,
+		/** Tramos de la noche con la luna sobre el horizonte. */
+		moonlit: spans.map((s) => ({
+			from: localTime(s.from),
+			to: localTime(s.to),
+			fromAt: s.from.toISOString(),
+			toAt: s.to.toISOString(),
+		})),
 	};
 }
 
@@ -267,10 +327,17 @@ const RANK = ["bueno", "regular", "malo"];
 /** Manda la nubosidad; el resto matiza el texto, no el veredicto. */
 function verdictFor(segments) {
 	if (segments.length === 0) return "malo";
+	// Cubierto de punta a punta (81 % o más en todos los tramos): no hay ventana.
+	if (segments.every((s) => (s.clouds?.code ?? 0) >= 8)) return "imposible";
 	const scores = segments.map((s) => WORST[s.clouds.quality]).sort((a, b) => a - b);
 	// La mediana evita que una sola hora mala condene una noche entera.
 	return RANK[scores[Math.floor(scores.length / 2)]];
 }
+
+/* Las frases viajan en piezas, no armadas: así la UI puede destacar el juicio
+   con el mismo color que ese dato lleva en su tarjeta. */
+const t = (text) => ({ text });
+const q = (text, quality) => ({ text, quality });
 
 /** Aviso aparte: el viento no entra en el veredicto pero sí cambia la salida. */
 function windWarningFor(segments) {
@@ -280,27 +347,55 @@ function windWarningFor(segments) {
 	const worst = windy.reduce((a, b) => (b.wind.code > a.wind.code ? b : a));
 	const when = windy.length === segments.length ? "toda la noche" : `cerca de las ${worst.time}`;
 
-	return `Se espera viento ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
+	return [
+		t("Se espera viento "),
+		q(worst.wind.label, worst.wind.quality),
+		t(` ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`),
+	];
 }
 
 function headlineFor(verdict, segments, moon) {
 	const clear = segments.filter((s) => s.clouds.quality === "bueno");
 
+	if (verdict === "imposible") {
+		return [
+			t("Cielo "),
+			q("cubierto de punta a punta", "imposible"),
+			t(": esta noche no hay nada que observar."),
+		];
+	}
+
 	if (verdict === "malo") {
 		return clear.length > 0
-			? `Noche mayormente nublada, con un claro cerca de las ${clear[0].time}.`
-			: "Cielo cubierto durante toda la noche.";
+			? [
+					t("Noche "),
+					q("mayormente nublada", "malo"),
+					t(", con "),
+					q(`un claro cerca de las ${clear[0].time}`, "bueno"),
+					t("."),
+				]
+			: [t("Cielo "), q("cubierto", "malo"), t(" durante toda la noche.")];
 	}
 
 	if (verdict === "regular") {
-		return "Noche con nubes intermitentes: se puede observar, pero a ratos.";
+		return [
+			t("Noche con "),
+			q("nubes intermitentes", "regular"),
+			t(": se puede observar, pero a ratos."),
+		];
 	}
 
 	if (moon.interference === "alta") {
-		return `Cielo despejado, aunque la ${moon.label} va a aclarar el fondo y tapar los objetos más tenues.`;
+		return [
+			t("Cielo "),
+			q("despejado", "bueno"),
+			t(`, aunque la ${moon.label} va a `),
+			q("aclarar el fondo", "regular"),
+			t(" y tapar los objetos más tenues."),
+		];
 	}
 
-	return "Cielo despejado durante la mayor parte de la noche.";
+	return [t("Cielo "), q("despejado", "bueno"), t(" durante la mayor parte de la noche.")];
 }
 
 /* ------------------------------------------------------------------ *
@@ -398,6 +493,10 @@ async function main() {
 			darkFrom: localTime(window.darkFrom),
 			darkUntil: localTime(window.darkUntil),
 			sunrise: localTime(window.sunrise),
+			sunsetAt: window.sunset.toISOString(),
+			darkFromAt: window.darkFrom.toISOString(),
+			darkUntilAt: window.darkUntil.toISOString(),
+			sunriseAt: window.sunrise.toISOString(),
 			moon,
 			verdict,
 			headline: headlineFor(verdict, segments, moon),

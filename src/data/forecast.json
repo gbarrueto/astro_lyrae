@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-07-31T18:14:58.406Z",
+	"generatedAt": "2026-08-01T06:38:11.049Z",
 	"model": {
 		"name": "7Timer! ASTRO",
 		"basis": "GFS",
-		"init": "2026073112",
+		"init": "2026080100",
 		"resolution": "3 horas"
 	},
 	"site": {
@@ -19,21 +19,80 @@
 		"darkFrom": "19:29",
 		"darkUntil": "06:16",
 		"sunrise": "07:46",
+		"sunsetAt": "2026-07-31T21:59:24.740Z",
+		"darkFromAt": "2026-07-31T23:29:45.650Z",
+		"darkUntilAt": "2026-08-01T10:16:15.580Z",
+		"sunriseAt": "2026-08-01T11:46:26.110Z",
 		"moon": {
 			"illumination": 93,
+			"phase": 0.582,
 			"label": "gibosa menguante",
 			"interference": "alta",
-			"rise": null,
-			"set": "08:54"
+			"rise": "20:13",
+			"riseAt": "2026-08-01T00:13:07.570Z",
+			"set": null,
+			"setAt": null,
+			"moonlit": [
+				{
+					"from": "20:13",
+					"to": "06:16",
+					"fromAt": "2026-08-01T00:13:07.570Z",
+					"toAt": "2026-08-01T10:16:15.580Z"
+				}
+			]
 		},
-		"verdict": "malo",
-		"headline": "Cielo cubierto durante toda la noche.",
+		"verdict": "imposible",
+		"headline": [
+			{
+				"text": "Cielo "
+			},
+			{
+				"text": "cubierto de punta a punta",
+				"quality": "imposible"
+			},
+			{
+				"text": ": esta noche no hay nada que observar."
+			}
+		],
 		"windWarning": null,
 		"segments": [
 			{
-				"label": "Anochecer",
-				"at": "2026-08-01T00:00:00.000Z",
-				"time": "20:00",
+				"label": "Medianoche",
+				"at": "2026-08-01T03:00:00.000Z",
+				"time": "23:00",
+				"clouds": {
+					"code": 9,
+					"range": "94–100 %",
+					"label": "cubierto",
+					"quality": "malo"
+				},
+				"seeing": {
+					"code": 2,
+					"range": "0,5–0,75\"",
+					"label": "muy bueno",
+					"quality": "bueno"
+				},
+				"transparency": {
+					"code": 8,
+					"label": "muy pobre",
+					"quality": "malo"
+				},
+				"obscured": true,
+				"temperature": 6,
+				"wind": {
+					"code": 2,
+					"range": "0,3–3,4 m/s",
+					"label": "brisa suave",
+					"quality": "bueno",
+					"direction": "NO"
+				},
+				"humidity": "95–100 %",
+				"precipitation": "snow"
+			},
+			{
+				"label": "Madrugada",
+				"at": "2026-08-01T06:00:00.000Z",
+				"time": "02:00",
 				"clouds": {
 					"code": 9,
 					"range": "94–100 %",
@@ -58,15 +117,15 @@
 					"range": "0,3–3,4 m/s",
 					"label": "brisa suave",
 					"quality": "bueno",
-					"direction": "N"
+					"direction": "NO"
 				},
 				"humidity": "95–100 %",
 				"precipitation": "snow"
 			},
 			{
-				"label": "Medianoche",
-				"at": "2026-08-01T03:00:00.000Z",
-				"time": "23:00",
+				"label": "Madrugada",
+				"at": "2026-08-01T09:00:00.000Z",
+				"time": "05:00",
 				"clouds": {
 					"code": 9,
 					"range": "94–100 %",
@@ -85,44 +144,11 @@
 					"quality": "malo"
 				},
 				"obscured": true,
-				"temperature": 6,
-				"wind": {
-					"code": 2,
-					"range": "0,3–3,4 m/s",
-					"label": "brisa suave",
-					"quality": "bueno",
-					"direction": "NO"
-				},
-				"humidity": "100–100 %",
-				"precipitation": "snow"
-			},
-			{
-				"label": "Madrugada",
-				"at": "2026-08-01T06:00:00.000Z",
-				"time": "02:00",
-				"clouds": {
-					"code": 9,
-					"range": "94–100 %",
-					"label": "cubierto",
-					"quality": "malo"
-				},
-				"seeing": {
-					"code": 4,
-					"range": "1–1,25\"",
-					"label": "aceptable",
-					"quality": "regular"
-				},
-				"transparency": {
-					"code": 8,
-					"label": "muy pobre",
-					"quality": "malo"
-				},
-				"obscured": true,
-				"temperature": 8,
+				"temperature": 7,
 				"wind": {
 					"code": 3,
 					"range": "3,4–8 m/s",
-					"label": "viento moderado",
+					"label": "moderado",
 					"quality": "bueno",
 					"direction": "N"
 				},
@@ -133,134 +159,6 @@
 	},
 	"series": [
 		{
-			"at": "2026-07-31T15:00:00.000Z",
-			"time": "11:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 4,
-				"range": "1–1,25\"",
-				"label": "aceptable",
-				"quality": "regular"
-			},
-			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
-			},
-			"obscured": true,
-			"temperature": 6,
-			"wind": {
-				"code": 2,
-				"range": "0,3–3,4 m/s",
-				"label": "brisa suave",
-				"quality": "bueno",
-				"direction": "NE"
-			},
-			"humidity": "100–100 %",
-			"precipitation": "snow"
-		},
-		{
-			"at": "2026-07-31T18:00:00.000Z",
-			"time": "14:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 4,
-				"range": "1–1,25\"",
-				"label": "aceptable",
-				"quality": "regular"
-			},
-			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
-			},
-			"obscured": true,
-			"temperature": 8,
-			"wind": {
-				"code": 3,
-				"range": "3,4–8 m/s",
-				"label": "moderado",
-				"quality": "bueno",
-				"direction": "NO"
-			},
-			"humidity": "100–100 %",
-			"precipitation": "rain"
-		},
-		{
-			"at": "2026-07-31T21:00:00.000Z",
-			"time": "17:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
-			},
-			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
-			},
-			"obscured": true,
-			"temperature": 7,
-			"wind": {
-				"code": 2,
-				"range": "0,3–3,4 m/s",
-				"label": "brisa suave",
-				"quality": "bueno",
-				"direction": "NO"
-			},
-			"humidity": "95–100 %",
-			"precipitation": "rain"
-		},
-		{
-			"at": "2026-08-01T00:00:00.000Z",
-			"time": "20:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
-			},
-			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
-			},
-			"obscured": true,
-			"temperature": 7,
-			"wind": {
-				"code": 2,
-				"range": "0,3–3,4 m/s",
-				"label": "brisa suave",
-				"quality": "bueno",
-				"direction": "N"
-			},
-			"humidity": "95–100 %",
-			"precipitation": "snow"
-		},
-		{
 			"at": "2026-08-01T03:00:00.000Z",
 			"time": "23:00",
 			"clouds": {
@@ -270,9 +168,9 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
+				"code": 2,
+				"range": "0,5–0,75\"",
+				"label": "muy bueno",
 				"quality": "bueno"
 			},
 			"transparency": {
@@ -289,7 +187,7 @@
 				"quality": "bueno",
 				"direction": "NO"
 			},
-			"humidity": "100–100 %",
+			"humidity": "95–100 %",
 			"precipitation": "snow"
 		},
 		{
@@ -302,10 +200,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 4,
-				"range": "1–1,25\"",
-				"label": "aceptable",
-				"quality": "regular"
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
 			},
 			"transparency": {
 				"code": 8,
@@ -313,11 +211,11 @@
 				"quality": "malo"
 			},
 			"obscured": true,
-			"temperature": 8,
+			"temperature": 7,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -334,10 +232,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 4,
-				"range": "1–1,25\"",
-				"label": "aceptable",
-				"quality": "regular"
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
 			},
 			"transparency": {
 				"code": 8,
@@ -349,7 +247,7 @@
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "viento moderado",
+				"label": "moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -366,14 +264,14 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 4,
-				"range": "1–1,25\"",
-				"label": "aceptable",
-				"quality": "regular"
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
 			},
 			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
+				"code": 7,
+				"label": "pobre",
 				"quality": "malo"
 			},
 			"obscured": true,
@@ -385,7 +283,7 @@
 				"quality": "bueno",
 				"direction": "N"
 			},
-			"humidity": "95–100 %",
+			"humidity": "100–100 %",
 			"precipitation": "snow"
 		},
 		{
@@ -404,9 +302,9 @@
 				"quality": "regular"
 			},
 			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
+				"code": 5,
+				"label": "aceptable",
+				"quality": "regular"
 			},
 			"obscured": true,
 			"temperature": 8,
@@ -417,7 +315,7 @@
 				"quality": "bueno",
 				"direction": "N"
 			},
-			"humidity": "95–100 %",
+			"humidity": "90–95 %",
 			"precipitation": "snow"
 		},
 		{
@@ -430,10 +328,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
+				"code": 4,
+				"range": "1–1,25\"",
+				"label": "aceptable",
+				"quality": "regular"
 			},
 			"transparency": {
 				"code": 8,
@@ -473,7 +371,7 @@
 				"quality": "malo"
 			},
 			"obscured": true,
-			"temperature": 6,
+			"temperature": 5,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
@@ -494,10 +392,10 @@
 				"quality": "malo"
 			},
 			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
+				"code": 4,
+				"range": "1–1,25\"",
+				"label": "aceptable",
+				"quality": "regular"
 			},
 			"transparency": {
 				"code": 8,
@@ -505,7 +403,7 @@
 				"quality": "malo"
 			},
 			"obscured": true,
-			"temperature": 5,
+			"temperature": 6,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
@@ -537,11 +435,11 @@
 				"quality": "malo"
 			},
 			"obscured": true,
-			"temperature": 6,
+			"temperature": 5,
 			"wind": {
 				"code": 3,
 				"range": "3,4–8 m/s",
-				"label": "moderado",
+				"label": "viento moderado",
 				"quality": "bueno",
 				"direction": "N"
 			},
@@ -575,7 +473,7 @@
 				"range": "3,4–8 m/s",
 				"label": "moderado",
 				"quality": "bueno",
-				"direction": "NO"
+				"direction": "N"
 			},
 			"humidity": "95–100 %",
 			"precipitation": "snow"
@@ -583,6 +481,134 @@
 		{
 			"at": "2026-08-02T09:00:00.000Z",
 			"time": "05:00",
+			"clouds": {
+				"code": 9,
+				"range": "94–100 %",
+				"label": "cubierto",
+				"quality": "malo"
+			},
+			"seeing": {
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
+			},
+			"transparency": {
+				"code": 8,
+				"label": "muy pobre",
+				"quality": "malo"
+			},
+			"obscured": true,
+			"temperature": 7,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "moderado",
+				"quality": "bueno",
+				"direction": "N"
+			},
+			"humidity": "95–100 %",
+			"precipitation": "snow"
+		},
+		{
+			"at": "2026-08-02T12:00:00.000Z",
+			"time": "08:00",
+			"clouds": {
+				"code": 9,
+				"range": "94–100 %",
+				"label": "cubierto",
+				"quality": "malo"
+			},
+			"seeing": {
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
+			},
+			"transparency": {
+				"code": 8,
+				"label": "muy pobre",
+				"quality": "malo"
+			},
+			"obscured": true,
+			"temperature": 7,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "moderado",
+				"quality": "bueno",
+				"direction": "N"
+			},
+			"humidity": "95–100 %",
+			"precipitation": "snow"
+		},
+		{
+			"at": "2026-08-02T15:00:00.000Z",
+			"time": "11:00",
+			"clouds": {
+				"code": 9,
+				"range": "94–100 %",
+				"label": "cubierto",
+				"quality": "malo"
+			},
+			"seeing": {
+				"code": 2,
+				"range": "0,5–0,75\"",
+				"label": "muy bueno",
+				"quality": "bueno"
+			},
+			"transparency": {
+				"code": 8,
+				"label": "muy pobre",
+				"quality": "malo"
+			},
+			"obscured": true,
+			"temperature": 7,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "moderado",
+				"quality": "bueno",
+				"direction": "NO"
+			},
+			"humidity": "100–100 %",
+			"precipitation": "snow"
+		},
+		{
+			"at": "2026-08-02T18:00:00.000Z",
+			"time": "14:00",
+			"clouds": {
+				"code": 9,
+				"range": "94–100 %",
+				"label": "cubierto",
+				"quality": "malo"
+			},
+			"seeing": {
+				"code": 3,
+				"range": "0,75–1\"",
+				"label": "bueno",
+				"quality": "bueno"
+			},
+			"transparency": {
+				"code": 8,
+				"label": "muy pobre",
+				"quality": "malo"
+			},
+			"obscured": true,
+			"temperature": 6,
+			"wind": {
+				"code": 3,
+				"range": "3,4–8 m/s",
+				"label": "moderado",
+				"quality": "bueno",
+				"direction": "NO"
+			},
+			"humidity": "95–100 %",
+			"precipitation": "snow"
+		},
+		{
+			"at": "2026-08-02T21:00:00.000Z",
+			"time": "17:00",
 			"clouds": {
 				"code": 9,
 				"range": "94–100 %",
@@ -613,8 +639,8 @@
 			"precipitation": "snow"
 		},
 		{
-			"at": "2026-08-02T12:00:00.000Z",
-			"time": "08:00",
+			"at": "2026-08-03T00:00:00.000Z",
+			"time": "20:00",
 			"clouds": {
 				"code": 9,
 				"range": "94–100 %",

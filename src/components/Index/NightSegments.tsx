@@ -94,7 +94,7 @@ export function NightSegments({ segments }: { segments: NightSegment[] }) {
 						<div className="flex items-baseline justify-between gap-3 duration-300 animate-in fade-in slide-in-from-bottom-1">
 							<h3 className="font-heading text-base font-medium">{segment.label}</h3>
 							{segment.precipitation && (
-								<span className="text-xs text-muted-foreground">
+								<span className="text-xs font-medium text-warn">
 									{segment.precipitation === "snow" ? "con nieve" : "con lluvia"}
 								</span>
 							)}
