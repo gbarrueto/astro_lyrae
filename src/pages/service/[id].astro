@@ -34,8 +34,6 @@ export function getStaticPaths() {
 const { id } = Astro.params as { id: ServiceId };
 const service = services[id];
 
-// La temporada se resuelve acá, en el servidor — no en cada render del cliente
-// como hacía ServiceDetail.jsx.
 const season = getSeason();
 const targets = getTargets(service.targetKind, season);
 
@@ -43,8 +41,7 @@ const whatsappHref = `https://wa.me/56988147137?text=${encodeURIComponent(
 	`Hola, me interesa el servicio de ${service.title}.`,
 )}`;
 
-// `satisfies` conserva los tipos literales de cada servicio, y los pasos sin
-// `flexible` pierden la propiedad. Anotarlo acá devuelve la forma común.
+// `satisfies` conserva los tipos literales: anotar devuelve la forma común.
 const experience: ExperienceStep[] = service.experience;
 const caveat = "caveat" in service ? service.caveat : null;
 const gallery: GalleryItem[] = "gallery" in service ? service.gallery : [];
@@ -52,13 +49,8 @@ const imagePosition = "imagePosition" in service ? service.imagePosition : undef
 const price: Pricing | null = service.price;
 const priceHeadline = priceSummary(service);
 
-// La sesión de fotos se suma a cualquier salida; desde su propia ficha no hay
-// nada que ofrecer, así que el cruce solo aparece en las otras dos.
 const photoAddOn = id === "fotografia-nocturna" ? null : services["fotografia-nocturna"];
 
-// Al terminar la ficha no había a dónde ir: comparar servicios obligaba a
-// devolverse a la portada y entrar de nuevo. Con solo tres servicios, mostrar
-// los otros dos —con precio— resuelve la comparación en el mismo lugar.
 const otherServices = serviceIds
 	.filter((other) => other !== id)
 	.map((other) => ({ id: other, ...services[other], tier: priceSummary(services[other]) }));
@@ -449,8 +441,7 @@ const otherServices = serviceIds
 		</div>
 	</main>
 
-	{/* Precio + reserva. En móvil queda fijo al borde inferior para que esté
-	    siempre a un pulgar de distancia; en desktop vuelve al flujo. */}
+	{/* Fijo al borde inferior en móvil; en desktop vuelve al flujo. */}
 	<div
 		class="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-background/90 backdrop-blur md:static md:border-0 md:bg-transparent md:backdrop-blur-none"
 	>

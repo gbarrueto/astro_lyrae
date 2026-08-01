@@ -1,12 +1,6 @@
 /**
- * Qué dibujo del cielo corresponde a una hora dada.
- *
- * El icono se compone por capas en vez de existir uno por combinación: ocho
- * fases de luna por cuatro niveles de nube por tres precipitaciones serían
- * cientos de dibujos. Ver `docs/iconos-cielo.md`.
- *
- * La misma función corre en el build (para el primer render) y en el navegador
- * (para refrescar sin recargar), así que no depende de nada del entorno.
+ * Icono de cielo compuesto por capas y helpers de presentación del pronóstico.
+ * Corre igual en el build y en el navegador. Ver `docs/iconos-cielo.md`.
  */
 
 export type SkyEvent = {
@@ -29,9 +23,13 @@ export type SeriesPoint = {
 	transparency: { code: number; label: string; quality: string } | null;
 	obscured: boolean;
 	temperature: number;
+	wind: { code: number; range: string; label: string; quality: string; direction: string } | null;
 	humidity: string | null;
 	precipitation: string | null;
 };
+
+/** Un tramo de la noche: un punto de la serie con su nombre. */
+export type NightSegment = SeriesPoint & { label: string };
 
 /** Nombre de archivo dentro de `src/assets/sky/`, sin extensión. */
 export type SkyLayer = string;
@@ -44,20 +42,14 @@ export type SkyPicture = {
 	daytime: "día" | "crepúsculo" | "noche";
 };
 
-/** Color del semáforo de condiciones. Los tokens viven en `global.css`. */
+/** Tokens definidos en `global.css`. */
 export const QUALITY_TONE: Record<string, string> = {
 	bueno: "text-good",
 	regular: "text-warn",
 	malo: "text-bad",
 };
 
-/**
- * Color de la temperatura.
- *
- * Un "5°" a secas no dice nada; en azul de helada, sí. Los cortes están
- * pensados para alguien parado dos horas de noche en la precordillera, no para
- * un informe meteorológico.
- */
+/** Cortes pensados para una noche de precordillera, no para un informe. */
 export function temperatureTone(celsius: number): string {
 	if (celsius <= 0) return "text-temp-freezing";
 	if (celsius <= 7) return "text-temp-cold";
@@ -66,7 +58,7 @@ export function temperatureTone(celsius: number): string {
 	return "text-temp-hot";
 }
 
-/** Cómo se lee el seeing actual para alguien que nunca lo escuchó nombrar. */
+/** El seeing actual en lenguaje llano. */
 export function seeingMeaning(
 	seeing: { label: string; range: string; quality: string } | null,
 	obscured: boolean,
@@ -74,7 +66,7 @@ export function seeingMeaning(
 	if (!seeing) return "Todavía no tenemos el dato para esta hora.";
 
 	if (obscured) {
-		return `El pronóstico marca un seeing ${seeing.label} (${seeing.range}), pero esta noche el cielo está cubierto: con nubes de por medio da lo mismo qué tan quieta esté la atmósfera.`;
+		return `El pronóstico marca un seeing ${seeing.label} (${seeing.range}), pero esta noche está nublado.`;
 	}
 
 	if (seeing.quality === "bueno") {
@@ -85,7 +77,24 @@ export function seeingMeaning(
 		return `Esta noche está ${seeing.label} (${seeing.range}): se observa bien, pero los objetos más pequeños se van a ver algo temblorosos.`;
 	}
 
-	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes —cúmulos, nebulosas— antes que a planetas.`;
+	return `Esta noche está ${seeing.label} (${seeing.range}): la imagen va a temblar bastante, así que conviene apuntar a objetos grandes antes que a planetas.`;
+}
+
+/** Sigla de origen del viento → hacia dónde apunta la flecha, y su nombre. */
+const WIND_ARROWS: Record<string, { deg: number; name: string }> = {
+	N: { deg: 180, name: "norte" },
+	NE: { deg: 225, name: "noreste" },
+	E: { deg: 270, name: "este" },
+	SE: { deg: 315, name: "sureste" },
+	S: { deg: 0, name: "sur" },
+	SO: { deg: 45, name: "suroeste" },
+	O: { deg: 90, name: "oeste" },
+	NO: { deg: 135, name: "noroeste" },
+};
+
+export function windArrow(direction: string | null): { deg: number; label: string } | null {
+	const arrow = direction ? WIND_ARROWS[direction] : null;
+	return arrow ? { deg: arrow.deg, label: `viento del ${arrow.name}` } : null;
 }
 
 const MOON_PHASES = [
@@ -147,14 +156,7 @@ export function pointFor(series: SeriesPoint[], at: Date): SeriesPoint | null {
 	);
 }
 
-/**
- * Compone el icono.
- *
- * Orden de las capas: halo, cuerpo celeste, nubes, precipitación. Con el cielo
- * cubierto el cuerpo queda detrás de la nube; si además brilla fuerte (el sol,
- * o la luna sobre 60 % de iluminación) se enciende el halo, que es como se ve
- * de verdad una nube densa con la luna llena detrás.
- */
+/** Capas de atrás hacia adelante: halo, cuerpo, nubes, precipitación. */
 export function skyPicture(
 	at: Date,
 	event: SkyEvent | null,
@@ -164,7 +166,6 @@ export function skyPicture(
 	const clouds = cloudLayer(point?.clouds?.code);
 	const heavy = clouds.layer === "clouds-heavy";
 
-	// Sin efemérides no se puede saber si es de día: se muestra solo el cielo.
 	if (!event) {
 		return {
 			layers: clouds.layer ? [clouds.layer] : ["stars"],
@@ -187,8 +188,7 @@ export function skyPicture(
 		bodyName = isTwilight ? "atardecer" : "día";
 		bright = true;
 	} else {
-		// De noche, la luna solo cuenta si está sobre el horizonte. Puede faltar
-		// alguno de los dos eventos cuando la luna no sale o no se pone ese día.
+		// Puede faltar alguno de los dos eventos si la luna no sale o no se pone.
 		const rise = event.moonrise ? ms(event.moonrise) : null;
 		const set = event.moonset ? ms(event.moonset) : null;
 		const up =
@@ -213,7 +213,6 @@ export function skyPicture(
 		}
 	}
 
-	// Con el cielo cubierto y un cuerpo que no brilla, no queda nada que asomar.
 	const showBody = !(heavy && !bright);
 
 	const layers: SkyLayer[] = [];
@@ -221,7 +220,7 @@ export function skyPicture(
 	if (showBody) layers.push(body);
 	if (clouds.layer) layers.push(clouds.layer);
 
-	// Llover con cielo despejado no tiene sentido: si el modelo lo reporta, se ignora.
+	// Llover con cielo despejado no tiene sentido: se ignora.
 	if (point?.precipitation && clouds.layer && clouds.layer !== "clouds-light") {
 		layers.push(point.precipitation === "snow" ? "snow" : "rain");
 	}

@@ -1,16 +1,7 @@
 /**
- * Pronóstico de la noche para el complejo, en un archivo.
- *
- * Consulta 7Timer! ASTRO (modelo GFS, un punto cada 3 horas), recorta la
- * ventana entre el atardecer y el amanecer, traduce las escalas numéricas a
- * lenguaje que entienda alguien que no sabe astronomía, y escribe
- * `src/data/forecast.json`.
- *
- * Lo corre un cron de GitHub Actions una vez al día. Si algo falla, sale con
- * código distinto de cero y NO toca el archivo: el sitio se queda con el
- * pronóstico de ayer, que es mejor que quedarse sin ninguno.
- *
- *   node scripts/forecast.mjs
+ * Escribe `src/data/forecast.json` con el pronóstico de la noche, a partir de
+ * 7Timer! ASTRO. Lo corre un cron diario; si falla, sale con código distinto de
+ * cero sin tocar el archivo.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -31,9 +22,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = path.join(ROOT, "src/data/forecast.json");
 
 /* ------------------------------------------------------------------ *
- * Escalas de 7Timer!
- *
- * La API devuelve enteros, no unidades. Estas tablas son las de su
+ * Escalas de 7Timer!: la API devuelve enteros, no unidades. Tablas de su
  * documentación oficial; el índice del arreglo es el código.
  * ------------------------------------------------------------------ */
 
@@ -51,10 +40,7 @@ const CLOUDS = [
 	{ range: "94–100 %", label: "cubierto", quality: "malo" },
 ];
 
-/**
- * seeing: 1–8, en segundos de arco. Menos es mejor: mide cuánto tiembla la
- * imagen por turbulencia, o sea cuánto detalle se puede sacar en planetas.
- */
+/** seeing: 1–8, en segundos de arco. Menos es mejor. */
 const SEEING = [
 	null,
 	{ range: '<0,5"', label: "excelente", quality: "bueno" },
@@ -67,11 +53,7 @@ const SEEING = [
 	{ range: '>2,5"', label: "muy malo", quality: "malo" },
 ];
 
-/**
- * transparency: 1–8, magnitudes de extinción por masa de aire. Menos es
- * mejor: mide cuánta luz se come la atmósfera, o sea qué tan tenues son los
- * objetos que alcanzamos a ver.
- */
+/** transparency: 1–8, magnitudes de extinción por masa de aire. Menos es mejor. */
 const TRANSPARENCY = [
 	null,
 	{ label: "excelente", quality: "bueno" },
@@ -84,26 +66,20 @@ const TRANSPARENCY = [
 	{ label: "muy pobre", quality: "malo" },
 ];
 
-/**
- * wind10m.speed: 1–8, en la escala de 7Timer (no en m/s).
- *
- * Para exposiciones largas el viento decide tanto como las nubes —con ráfagas
- * no hay trípode que aguante— y para el resto del grupo define cuánto hay que
- * abrigarse. A diferencia del seeing, sigue siendo válido con cielo cubierto.
- */
+/** wind10m.speed: 1–8, en la escala de 7Timer, no en m/s. */
 const WIND = [
 	null,
 	{ range: "<0,3 m/s", label: "calma", quality: "bueno" },
 	{ range: "0,3–3,4 m/s", label: "brisa suave", quality: "bueno" },
-	{ range: "3,4–8 m/s", label: "viento moderado", quality: "bueno" },
-	{ range: "8–10,8 m/s", label: "viento fresco", quality: "regular" },
-	{ range: "10,8–17,2 m/s", label: "viento fuerte", quality: "malo" },
+	{ range: "3,4–8 m/s", label: "moderado", quality: "bueno" },
+	{ range: "8–10,8 m/s", label: "fresco", quality: "regular" },
+	{ range: "10,8–17,2 m/s", label: "fuerte", quality: "malo" },
 	{ range: "17,2–24,5 m/s", label: "temporal", quality: "malo" },
 	{ range: "24,5–32,6 m/s", label: "tormenta", quality: "malo" },
 	{ range: ">32,6 m/s", label: "huracanado", quality: "malo" },
 ];
 
-/** Las direcciones vienen en inglés ("NW"); acá se usan las nuestras. */
+/** Direcciones en inglés → siglas nuestras. */
 const WIND_DIRECTION = {
 	N: "N",
 	NE: "NE",
@@ -132,11 +108,8 @@ function humidityRange(code) {
 const scale = (table, code) => (table[code] ? { code, ...table[code] } : null);
 
 /* ------------------------------------------------------------------ *
- * Fechas y zona horaria
- *
- * 7Timer trabaja en UTC. Chile cambia de huso dos veces al año, así que
- * cualquier desfase fijo lee la hora equivocada media temporada: siempre se
- * resuelve con la zona horaria real.
+ * Fechas y zona horaria. 7Timer trabaja en UTC y Chile cambia de huso dos veces
+ * al año: nunca usar un desfase fijo.
  * ------------------------------------------------------------------ */
 
 /** "2026072818" (UTC) → Date */
@@ -185,11 +158,9 @@ function zoneOffset(date) {
 }
 
 /**
- * El instante exacto en que en el complejo son las `hour` del día `ymd`.
- *
- * SunCalc razona sobre el día UTC de la fecha que recibe, así que pasarle un
- * "ahora" cualquiera desfasa la noche entera: entre las 20:00 y medianoche en
- * Chile, el día UTC ya cambió. Anclando al mediodía local eso no ocurre.
+ * El instante en que en el complejo son las `hour` del día `ymd`. SunCalc razona
+ * sobre el día UTC de la fecha que recibe, así que hay que anclarlo al mediodía
+ * local o la noche se desfasa entera.
  */
 function atLocalHour(ymd, hour) {
 	const guess = new Date(`${ymd}T${String(hour).padStart(2, "0")}:00:00Z`);
@@ -206,10 +177,7 @@ function addDays(ymd, days) {
  * La noche
  * ------------------------------------------------------------------ */
 
-/**
- * La ventana observable: del atardecer de hoy al amanecer de mañana. Si el
- * script corre de madrugada, la noche en curso sigue siendo la de ayer.
- */
+/** Del atardecer de hoy al amanecer de mañana. */
 function nightWindow(now) {
 	// Antes del mediodía la noche vigente todavía es la que empezó ayer.
 	const today = localDate(now);
@@ -261,13 +229,7 @@ function moonReport(window) {
 	};
 }
 
-/**
- * Salidas y puestas de sol y luna para varios días, en instantes absolutos.
- *
- * La barra superior tiene que decidir a cualquier hora si dibuja sol, luna o
- * estrellas, y el sitio es estático: en vez de recalcular efemérides en el
- * navegador, viajan resueltas y el cliente solo compara marcas de tiempo.
- */
+/** Efemérides de varios días en instantes absolutos, para comparar en el cliente. */
 function skyEvents(fromDate, days = 3) {
 	const events = [];
 
@@ -302,10 +264,7 @@ function skyEvents(fromDate, days = 3) {
 const WORST = { bueno: 0, regular: 1, malo: 2 };
 const RANK = ["bueno", "regular", "malo"];
 
-/**
- * Manda la nubosidad: sin cielo despejado no hay nada que hacer, por muy
- * bueno que esté el seeing. El resto matiza el texto, no el veredicto.
- */
+/** Manda la nubosidad; el resto matiza el texto, no el veredicto. */
 function verdictFor(segments) {
 	if (segments.length === 0) return "malo";
 	const scores = segments.map((s) => WORST[s.clouds.quality]).sort((a, b) => a - b);
@@ -313,11 +272,7 @@ function verdictFor(segments) {
 	return RANK[scores[Math.floor(scores.length / 2)]];
 }
 
-/**
- * El viento no entra en el veredicto —se puede observar con viento— pero sí
- * arruina la fotografía de larga exposición y cambia cuánto hay que abrigarse,
- * así que cuando aprieta va dicho aparte.
- */
+/** Aviso aparte: el viento no entra en el veredicto pero sí cambia la salida. */
 function windWarningFor(segments) {
 	const windy = segments.filter((s) => s.wind && s.wind.quality === "malo");
 	if (windy.length === 0) return null;
@@ -325,7 +280,7 @@ function windWarningFor(segments) {
 	const worst = windy.reduce((a, b) => (b.wind.code > a.wind.code ? b : a));
 	const when = windy.length === segments.length ? "toda la noche" : `cerca de las ${worst.time}`;
 
-	return `Se espera ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
+	return `Se espera viento ${worst.wind.label} ${when}: hay que abrigarse más de lo que dice el termómetro, y la fotografía de larga exposición se complica.`;
 }
 
 function headlineFor(verdict, segments, moon) {
@@ -402,11 +357,6 @@ async function main() {
 			clouds,
 			seeing: scale(SEEING, point.seeing),
 			transparency: scale(TRANSPARENCY, point.transparency),
-			/**
-			 * Con el cielo tapado, el seeing y la transparencia dejan de decir
-			 * nada: no hay nada que observar por muy quieta que esté la
-			 * atmósfera. La UI los muestra, pero anulados.
-			 */
 			obscured: clouds?.quality === "malo",
 			temperature: point.temp2m,
 			wind: windScale(point.wind10m),
@@ -416,20 +366,13 @@ async function main() {
 		};
 	});
 
-	// La barra superior necesita condiciones a cualquier hora, no solo de noche,
-	// así que la serie completa viaja aparte. 48 horas alcanzan de sobra: el
-	// archivo se regenera a diario y así sobrevive un día de cron caído.
+	// La barra superior necesita condiciones a cualquier hora, no solo de noche.
 	const series = points
 		.filter((p) => p._at >= new Date(now.getTime() - 6 * 3600e3))
 		.slice(0, 16)
 		.map(({ _at, ...rest }) => rest);
 
-	// La ventana observable es la que arma el bloque del pronóstico.
-	//
-	// Se muestran los tres primeros tramos y no la noche completa: una salida
-	// dura unas dos horas y arranca al anochecer, así que con nueve horas desde
-	// el crepúsculo sobra. En invierno la noche da para un cuarto punto, pero cae
-	// casi al amanecer y nadie decide nada con él.
+	// Tres tramos y no la noche completa: una salida dura unas dos horas.
 	const segments = points
 		.filter((p) => p._at >= window.darkFrom && p._at <= window.darkUntil)
 		.slice(0, 3)
@@ -450,13 +393,7 @@ async function main() {
 		night: {
 			date: window.date,
 			sunset: localTime(window.sunset),
-			/**
-			 * La hora tope para pedir la salida de esta noche. La regla del
-			 * servicio ("dos horas antes del atardecer") solo es accionable si
-			 * alguien ya hizo la resta: nadie sabe de memoria cuándo atardece.
-			 */
 			bookingDeadline: localTime(new Date(window.sunset.getTime() - 2 * 3600e3)),
-			/** El mismo plazo como instante absoluto, para comparar en el cliente. */
 			bookingDeadlineAt: new Date(window.sunset.getTime() - 2 * 3600e3).toISOString(),
 			darkFrom: localTime(window.darkFrom),
 			darkUntil: localTime(window.darkUntil),
@@ -474,8 +411,7 @@ async function main() {
 	};
 
 	if (segments.length === 0) {
-		// Pasa si el modelo se quedó corto para la noche que viene. Preferimos
-		// avisar antes que publicar una noche vacía.
+		// El modelo se quedó corto para la noche que viene.
 		throw new Error("Ningún punto del modelo cae dentro de la ventana nocturna");
 	}
 
