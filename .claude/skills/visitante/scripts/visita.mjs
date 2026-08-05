@@ -199,7 +199,12 @@ const LEER = (max = 110) => `
     const act = el.closest('a[href],button,[role=button],[role=tab],[role=radio]') || el;
     const marcas = [];
     if (act.tagName === 'A') marcas.push(act.getAttribute('href'));
-    if ((act.getAttribute('aria-selected') ?? act.getAttribute('aria-checked')) === 'true') marcas.push('ACTIVO');
+    // Un control puede anunciarse activo de cuatro formas según el patrón que
+    // use (tab, radio, toggle, navegación); si solo se mira una, el recorrido
+    // reporta "no se ve cuál está elegido" cuando sí se ve.
+    const act_ = act.getAttribute('aria-selected') ?? act.getAttribute('aria-checked') ?? act.getAttribute('aria-pressed');
+    const cur = act.getAttribute('aria-current');
+    if (act_ === 'true' || (cur && cur !== 'false')) marcas.push('ACTIVO');
     if (act.getAttribute('aria-expanded') === 'true') marcas.push('ABIERTO');
     if (act.disabled || act.getAttribute('aria-disabled') === 'true') marcas.push('DESACTIVADO');
     salida.push({ y: Math.round(r.top + scrollY), tag: el.tagName.toLowerCase(), txt, marcas });
