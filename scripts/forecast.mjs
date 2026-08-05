@@ -177,11 +177,12 @@ function addDays(ymd, days) {
  * La noche
  * ------------------------------------------------------------------ */
 
-/** Del atardecer de hoy al amanecer de mañana. */
-function nightWindow(now) {
+/** Del atardecer de hoy al amanecer de mañana. `offset` salta a noches futuras. */
+function nightWindow(now, offset = 0) {
 	// Antes del mediodía la noche vigente todavía es la que empezó ayer.
 	const today = localDate(now);
-	const date = localHour(now) < 12 ? addDays(today, -1) : today;
+	const base = localHour(now) < 12 ? addDays(today, -1) : today;
+	const date = addDays(base, offset);
 
 	const noon = atLocalHour(date, 12);
 	const nextNoon = atLocalHour(addDays(date, 1), 12);
@@ -441,7 +442,6 @@ async function main() {
 	}
 
 	const initAt = parseInit(astro.init);
-	const window = nightWindow(now);
 
 	const points = astro.dataseries.map((point) => {
 		const at = new Date(initAt.getTime() + point.timepoint * 3600e3);
@@ -464,32 +464,30 @@ async function main() {
 	// La barra superior necesita condiciones a cualquier hora, no solo de noche.
 	const series = points
 		.filter((p) => p._at >= new Date(now.getTime() - 6 * 3600e3))
-		.slice(0, 16)
 		.map(({ _at, ...rest }) => rest);
 
-	// Tres tramos y no la noche completa: una salida dura unas dos horas.
-	const segments = points
-		.filter((p) => p._at >= window.darkFrom && p._at <= window.darkUntil)
-		.slice(0, 3)
-		.map(({ _at, ...rest }) => ({ label: segmentLabel(localHour(_at)), ...rest }));
+	/** Una noche completa: ventana, tramos, luna y veredicto. */
+	const buildNight = (offset) => {
+		const window = nightWindow(now, offset);
 
-	const moon = moonReport(window);
-	const verdict = verdictFor(segments);
+		// Tres tramos y no la noche completa: una salida dura unas dos horas.
+		const segments = points
+			.filter((p) => p._at >= window.darkFrom && p._at <= window.darkUntil)
+			.slice(0, 3)
+			.map(({ _at, ...rest }) => ({ label: segmentLabel(localHour(_at)), ...rest }));
 
-	const forecast = {
-		generatedAt: now.toISOString(),
-		model: {
-			name: "7Timer! ASTRO",
-			basis: "GFS",
-			init: astro.init,
-			resolution: "3 horas",
-		},
-		site: SITE,
-		night: {
+		if (segments.length === 0) return null;
+
+		const moon = moonReport(window);
+		const verdict = verdictFor(segments);
+		const deadline = new Date(window.sunset.getTime() - 2 * 3600e3);
+
+		return {
 			date: window.date,
+			offset,
 			sunset: localTime(window.sunset),
-			bookingDeadline: localTime(new Date(window.sunset.getTime() - 2 * 3600e3)),
-			bookingDeadlineAt: new Date(window.sunset.getTime() - 2 * 3600e3).toISOString(),
+			bookingDeadline: localTime(deadline),
+			bookingDeadlineAt: deadline.toISOString(),
 			darkFrom: localTime(window.darkFrom),
 			darkUntil: localTime(window.darkUntil),
 			sunrise: localTime(window.sunrise),
@@ -502,17 +500,34 @@ async function main() {
 			headline: headlineFor(verdict, segments, moon),
 			windWarning: windWarningFor(segments),
 			segments,
+		};
+	};
+
+	// El modelo llega a 72 h, así que la tercera noche puede quedar incompleta
+	// según el run publicado: se emiten solo las que tienen datos.
+	const nights = [0, 1, 2].map(buildNight).filter(Boolean);
+
+	if (nights.length === 0) {
+		throw new Error("Ningún punto del modelo cae dentro de una ventana nocturna");
+	}
+
+	const forecast = {
+		generatedAt: now.toISOString(),
+		model: {
+			name: "7Timer! ASTRO",
+			basis: "GFS",
+			init: astro.init,
+			resolution: "3 horas",
 		},
+		site: SITE,
+		nights,
+		/** La noche vigente. Se mantiene aparte para no romper a quien ya la lee. */
+		night: nights[0],
 		/** Serie continua para la barra superior: condiciones a cualquier hora. */
 		series,
 		/** Efemérides ya resueltas, para elegir el icono sin recalcular nada. */
-		sky: skyEvents(window.date, 3),
+		sky: skyEvents(nights[0].date, 4),
 	};
-
-	if (segments.length === 0) {
-		// El modelo se quedó corto para la noche que viene.
-		throw new Error("Ningún punto del modelo cae dentro de la ventana nocturna");
-	}
 
 	const serialized = JSON.stringify(forecast, null, "\t") + "\n";
 	const previous = await readFile(OUTPUT, "utf8").catch(() => null);
@@ -522,8 +537,8 @@ async function main() {
 
 	const changed = previous === null || stripTimestamp(previous) !== stripTimestamp(serialized);
 	console.log(
-		`${changed ? "Actualizado" : "Sin cambios"}: noche del ${window.date}, ` +
-			`veredicto "${verdict}", ${segments.length} tramos (modelo ${astro.init}).`,
+		`${changed ? "Actualizado" : "Sin cambios"}: ${nights.length} noche(s) desde ${nights[0].date} ` +
+			`(${nights.map((n) => n.verdict).join(", ")}) · modelo ${astro.init}.`,
 	);
 }
 
