@@ -85,6 +85,11 @@ ya no está a la vista.
 
 *(fricción #4 del recorrido de visitante, semilla 330439)*
 
+> **Hecho lo de "Deberías saber".** Los puntos 01 y 03 llevan enlace a
+> `#pronostico`, y `section[id]` gana `scroll-margin-top` en `global.css` para que
+> el título del destino no quede bajo la barra fija. **Falta el salto desde la
+> barra superior**, que sigue enredado con el pendiente de la ubicación.
+
 Para una huésped que llega desde el mensaje de bienvenida, *"¿se puede hoy?"* es
 **la** pregunta, y el pronóstico está en la cuarta pantalla. Peor: el punto 01 de
 "Deberías saber" le dice literalmente *"Revisa el pronóstico del tiempo"* y no
@@ -237,6 +242,10 @@ popover donde aparece la cifra.
 
 *(fricción #6 del recorrido de visitante, semilla 330439)*
 
+> **Hecho a medias.** El rango degenerado ya no aparece: `humidityRange()` imprime
+> `100 %` cuando los dos extremos coinciden. Falta la segunda parte —explicar de
+> qué es el porcentaje—, que va junto con los popovers de términos.
+
 Dos cosas distintas en el mismo dato.
 
 **1. `100–100 %` se lee como un descuido.** `humidityRange()` en
@@ -325,9 +334,11 @@ pregunta práctica de quien sale dos horas a estar quieto de noche.
 
 ## Barra superior
 
-### Icono del botón de seeing: interrogación, no exclamación
+### Icono del botón de seeing: interrogación, no exclamación ✅
 
 *(a raíz del recorrido de visitante, semilla 330439)*
+
+> **Hecho.** `HelpCircleIcon` en lugar de `InformationCircleIcon`.
 
 El botón usa `InformationCircleIcon` de hugeicons (`SkyStatus.tsx:147`), que se
 lee como un signo de admiración —aviso, algo va mal— cuando lo que hace en
@@ -464,8 +475,10 @@ Ordenado por lo que más rinde:
 2. **`Alert` para los avisos.** El bloque de exclusividad en `Intro.astro`, el
    `windWarning` y la nota de "seeing tachado" en `NightForecast.astro` son
    todos `div` estilizados a mano.
-3. **`Badge` para los chips.** Los objetivos observables (`Nebulosa Carina`,
-   `47 Tucanae`) y el chip del veredicto de la noche son spans con clases.
+3. ~~**`Badge` para los chips.**~~ **Hecho en los objetivos observables** de la
+   ficha de servicio. Ojo con la variante: `secondary` los dejaba grises y perdían
+   la identidad, así que van con `outline` más los tokens del ámbar de marca. El
+   chip del veredicto de la noche sigue siendo un span con clases.
 4. **`Separator`** en vez de los `border-t` repartidos por las tarjetas.
 5. **`Tooltip` o `Popover` en el resto de los términos técnicos.** El seeing ya
    lo tiene en la barra; transparencia, apertura y relación focal siguen sin

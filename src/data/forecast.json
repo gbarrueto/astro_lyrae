@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-05T01:43:16.510Z",
+	"generatedAt": "2026-08-05T04:02:33.679Z",
 	"model": {
 		"name": "7Timer! ASTRO",
 		"basis": "GFS",
@@ -235,7 +235,7 @@
 						"quality": "bueno",
 						"direction": "NO"
 					},
-					"humidity": "100–100 %",
+					"humidity": "100 %",
 					"precipitation": "rain"
 				},
 				{
@@ -268,7 +268,7 @@
 						"quality": "bueno",
 						"direction": "O"
 					},
-					"humidity": "100–100 %",
+					"humidity": "100 %",
 					"precipitation": "snow"
 				},
 				{
@@ -603,38 +603,6 @@
 	},
 	"series": [
 		{
-			"at": "2026-08-04T21:00:00.000Z",
-			"time": "17:00",
-			"clouds": {
-				"code": 9,
-				"range": "94–100 %",
-				"label": "cubierto",
-				"quality": "malo"
-			},
-			"seeing": {
-				"code": 3,
-				"range": "0,75–1\"",
-				"label": "bueno",
-				"quality": "bueno"
-			},
-			"transparency": {
-				"code": 8,
-				"label": "muy pobre",
-				"quality": "malo"
-			},
-			"obscured": true,
-			"temperature": 8,
-			"wind": {
-				"code": 2,
-				"range": "0,3–3,4 m/s",
-				"label": "brisa suave",
-				"quality": "bueno",
-				"direction": "N"
-			},
-			"humidity": "95–100 %",
-			"precipitation": null
-		},
-		{
 			"at": "2026-08-05T00:00:00.000Z",
 			"time": "20:00",
 			"clouds": {
@@ -855,7 +823,7 @@
 				"quality": "bueno",
 				"direction": "N"
 			},
-			"humidity": "100–100 %",
+			"humidity": "100 %",
 			"precipitation": "snow"
 		},
 		{
@@ -919,7 +887,7 @@
 				"quality": "bueno",
 				"direction": "NO"
 			},
-			"humidity": "100–100 %",
+			"humidity": "100 %",
 			"precipitation": "rain"
 		},
 		{
@@ -951,7 +919,7 @@
 				"quality": "bueno",
 				"direction": "O"
 			},
-			"humidity": "100–100 %",
+			"humidity": "100 %",
 			"precipitation": "snow"
 		},
 		{

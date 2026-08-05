@@ -1,10 +1,14 @@
 ---
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+
 const topics = [
 	{
 		title: "Revisa el pronóstico del tiempo",
 		body: [
 			"¡No queremos nubes! Una noche completamente despejada es imprescindible para la observación de estrellas.",
 		],
+		link: "Ver cómo estará esta noche",
 	},
 	{
 		title: "Entendamos la calidad óptica",
@@ -18,8 +22,9 @@ const topics = [
 		body: [
 			"El seeing se refiere a la turbulencia atmosférica que puede distorsionar la imagen de los objetos celestes.",
 			"Este depende de factores como la altitud, la humedad y la temperatura. En general, las noches frías y secas suelen tener mejor seeing.",
-			"¡Un mal seeing puede arruinar la observación de objetos pequeños! Más abajo puedes ver cómo se espera que esté esta noche, hora por hora.",
+			"¡Un mal seeing puede arruinar la observación de objetos pequeños!",
 		],
+		link: "Ver el seeing de esta noche",
 	},
 ];
 ---
@@ -48,6 +53,16 @@ const topics = [
 						<div class="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
 							{topic.body.map((text) => <p>{text}</p>)}
 						</div>
+
+						{"link" in topic && (
+							<a
+								href="#pronostico"
+								class="mt-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-4"
+							>
+								{topic.link}
+								<HugeiconsIcon icon={ArrowDown01Icon} size={15} />
+							</a>
+						)}
 					</article>
 				))
 			}

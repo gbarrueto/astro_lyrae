@@ -102,7 +102,7 @@ function humidityRange(code) {
 	if (typeof code !== "number") return null;
 	const low = Math.min(Math.max((code + 4) * 5, 0), 100);
 	const high = Math.min(low + 5, 100);
-	return `${low}–${high} %`;
+	return low === high ? `${low} %` : `${low}–${high} %`;
 }
 
 const scale = (table, code) => (table[code] ? { code, ...table[code] } : null);
