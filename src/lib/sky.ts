@@ -356,9 +356,9 @@ export function serviceImpact(night: NightData): ServiceImpact[] {
 
 	return [
 		clouded
-			? blocked("Luna y planetas", "/service/observacion-visual")
+			? blocked("Observación Visual", "/service/observacion-visual")
 			: {
-					service: "Luna y planetas",
+					service: "Observación Visual",
 					href: "/service/observacion-visual",
 					status: bestSeeing ? "Óptimo" : "Parcial",
 					limit: bestSeeing ? "seeing fino" : "seeing inestable",
@@ -366,9 +366,9 @@ export function serviceImpact(night: NightData): ServiceImpact[] {
 				},
 
 		clouded
-			? blocked("Cielo profundo", "/service/eaa")
+			? blocked("EAA", "/service/eaa")
 			: {
-					service: "Cielo profundo",
+					service: "EAA",
 					href: "/service/eaa",
 					status: moon.interference === "baja" ? "Óptimo" : "Parcial",
 					limit:
@@ -379,9 +379,9 @@ export function serviceImpact(night: NightData): ServiceImpact[] {
 				},
 
 		clouded
-			? blocked("Astrofotografía", "/service/fotografia-nocturna")
+			? blocked("Fotografía Nocturna", "/service/fotografia-nocturna")
 			: {
-					service: "Astrofotografía",
+					service: "Fotografía Nocturna",
 					href: "/service/fotografia-nocturna",
 					status: windy || moon.interference === "alta" ? "Parcial" : "Óptimo",
 					limit: windy

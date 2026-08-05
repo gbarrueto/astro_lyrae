@@ -157,8 +157,8 @@ function WeatherPill({ segment, open }: { segment: NightSegment; open: boolean }
 	return (
 		<span
 			className={cn(
-				"inline-flex min-h-11 items-center gap-2 rounded-full py-1.5 pr-3 pl-1.5 transition",
-				open ? "bg-card ring-1 ring-white/20" : "bg-white/5 ring-1 ring-white/8",
+				"inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full py-1.5 pr-3 pl-1.5 transition",
+				open ? "bg-card ring-1 ring-white/20" : "bg-white/5 ring-1 ring-white/8 hover:bg-white/10 hover:ring-white/15",
 			)}
 		>
 			<span
@@ -446,7 +446,7 @@ export function NightPanel({
 								aria-pressed={active}
 								onClick={() => setSelected(index)}
 								className={cn(
-									"flex min-h-11 flex-col items-start justify-center gap-0.5 rounded-xl px-3 py-2 text-left transition",
+									"flex min-h-11 cursor-pointer flex-col items-start justify-center gap-0.5 rounded-xl px-3 py-2 text-left transition hover:brightness-125",
 									active ? cn(tone.tint, "ring-1 ring-white/20") : "bg-white/4 ring-1 ring-white/8",
 								)}
 							>
@@ -498,16 +498,18 @@ export function NightPanel({
 						))}
 					</div>
 
-					<p
-						className={cn(
-							"mt-3 rounded-xl px-3 py-2.5 text-xs leading-snug",
-							actionable ? "bg-primary/10 ring-1 ring-primary/30" : "bg-white/5 ring-1 ring-white/8",
-						)}
-					>
-						Cierre para avisar{" "}
-						<span className="font-bold tabular-nums">{night.bookingDeadline}</span>
-						{deadlineNote && <span className="text-muted-foreground"> · {deadlineNote}</span>}
-					</p>
+					{verdict.viable && (
+						<p
+							className={cn(
+								"mt-3 rounded-xl px-3 py-2.5 text-xs leading-snug",
+								actionable ? "bg-primary/10 ring-1 ring-primary/30" : "bg-white/5 ring-1 ring-white/8",
+							)}
+						>
+							Cierre para avisar{" "}
+							<span className="font-bold tabular-nums">{night.bookingDeadline}</span>
+							{deadlineNote && <span className="text-muted-foreground"> · {deadlineNote}</span>}
+						</p>
+					)}
 
 					{actionable ? (
 						<a
@@ -541,12 +543,12 @@ export function NightPanel({
 					<p className="text-[10px] font-bold tracking-[0.16em] text-muted-foreground uppercase">
 						Qué se puede hacer
 					</p>
-					<ul className="mt-2 flex flex-col">
+					<ul className="mt-2 -mx-2 flex flex-col gap-0.5">
 						{impacts.map((impact) => (
 							<li key={impact.service}>
 								<a
 									href={impact.href}
-									className="flex min-h-11 items-center gap-2 rounded-lg px-1 transition hover:bg-white/4"
+									className="flex min-h-11 items-center gap-2.5 rounded-xl px-2.5 py-2 transition hover:bg-white/6"
 								>
 									<span className={cn("size-1.5 shrink-0 rounded-full", DOT[impact.quality])} />
 									<span className="text-xs font-semibold">{impact.service}</span>
@@ -605,7 +607,7 @@ export function NightPanel({
 						type="button"
 						onClick={() => setOpenBy((state) => ({ ...state, [night.date]: !expanded }))}
 						aria-expanded={expanded}
-						className="mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-white/5 text-xs font-semibold text-primary transition hover:bg-white/8"
+						className="mt-2 flex min-h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white/5 text-xs font-semibold text-primary transition hover:bg-white/10"
 					>
 						{expanded ? "Ocultar la noche" : "Ver la noche completa"}
 						<span className={cn("transition-transform", expanded && "rotate-180")}>
