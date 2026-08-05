@@ -60,6 +60,23 @@ Agregar a `src/lib/services.ts`:
   tarifa (ver `.claude/skills/asesor-tarifas/`): un alza de precio apoyada en la
   calidad del cielo necesita que la calidad del cielo esté escrita.
 
+### El texto introductorio ya no acompaña a las imágenes
+
+Los tres párrafos de `Intro.astro` se escribieron cuando el carrusel mostraba una
+foto por servicio: cada párrafo era el pie de una imagen concreta. Hoy el
+carrusel muestra **experiencias** —la Vía Láctea sobre las cabañas, el grupo
+observando, la pareja retratada— y el texto quedó describiendo un catálogo que
+ya no está a la vista.
+
+- Reescribir los párrafos para que hablen de la experiencia, no del catálogo:
+  los servicios ya tienen su propia sección justo debajo, con foto, precio y
+  duración.
+- De paso se resuelve algo detectado en los recorridos: el segundo párrafo dice
+  *"Electronically Assisted Astronomy (EAA)"* en inglés, y ahí es donde el
+  visitante sin astronomía deja de leer.
+- Ojo con el largo: es lo primero que se ve después del botón de reserva y del
+  aviso de exclusividad. Tres párrafos son mucho para esa posición.
+
 ---
 
 ## Navegación
@@ -120,9 +137,15 @@ Por qué así y no lo otro:
 
 ## Pronóstico
 
-### Mostrar más de una noche
+### Mostrar más de una noche ✅
 
 *(fricción #1 del recorrido de visitante, semilla 330439)*
+
+> **Hecho.** `scripts/forecast.mjs` emite `nights[]` y `NightPanel.tsx` abre con
+> un selector de noche. Verificado contra la API: 7Timer llega a 72 h, o sea tres
+> noches con cuatro puntos cada una — pero el alcance se cuenta desde el `init`
+> del modelo, así que el script emite **solo las noches que tienen datos** y el
+> selector renderiza las que existan. Con una sola noche, ni siquiera aparece.
 
 La visitante llevaba tres noches por delante y el sitio solo le mostró una. Peor:
 el propio bloque le ofrece *"Escríbenos y buscamos otra noche de tu estadía"* y
@@ -161,9 +184,14 @@ viviendo.
 - Es la misma raíz que el punto siguiente: pasada la medianoche, el sitio se
   desincroniza de quien lo está mirando. Conviene resolverlos juntos.
 
-### No abrir en un tramo de hora que ya pasó
+### No abrir en un tramo de hora que ya pasó ✅
 
 *(fricción #3 del mismo recorrido)*
+
+> **Resuelto por rediseño.** Se fueron las pestañas de hora: los tres tramos
+> viven ahora dentro de la línea de tiempo, cada uno en su hora real, y el
+> marcador «AHORA» muestra dónde está parado el visitante. Ya no hay un tramo
+> "seleccionado por defecto" que pueda estar vencido.
 
 A la 01:10 la tarjeta venía abierta en "Anochecer · 20:00", un tramo que había
 ocurrido cinco horas antes. La visitante lo notó de inmediato y le restó
@@ -199,6 +227,11 @@ Lo que hay que decir de cada uno es **qué se ve distinto y cómo se pasa la noc
 
 Sirve el mismo patrón del seeing: `Popover` o `Tooltip` en el término, con una
 frase en lenguaje llano. Enlaza con el punto 5 de "Sacarle provecho a shadcn".
+
+**Parcialmente cubierto** por el bloque "Qué se puede hacer" del panel nuevo, que
+traduce la noche a impacto por servicio ("luna al 60%", "viento sobre el
+trípode"). Lo que sigue faltando es la explicación **del término en sí**, en el
+popover donde aparece la cifra.
 
 ### Humedad: el rango degenerado y de qué es el porcentaje
 
@@ -309,6 +342,22 @@ el término dejó de ser ruido.
 - Candidato en el set instalado: `HelpCircleIcon` / `QuestionMarkIcon` de
   `@hugeicons/core-free-icons`.
 
+### De dónde son la hora y la temperatura
+
+La barra muestra hora, temperatura y seeing sin decir **de qué lugar**. Para
+quien llega desde Instagram o Google, esos números no tienen referente; para el
+huésped, confirmarían que el dato es del complejo y no de su ciudad.
+
+Idea: icono de ubicación + "Quillaileo", enlazado a la ubicación en Google Maps.
+
+⚠️ **Compite por el mismo espacio que el pendiente "Saltos hacia el pronóstico"**
+(sección Navegación), que propone convertir el icono de cielo y la temperatura en
+un salto a `#pronostico`. La barra tiene tres zonas y en 390 px ya está llena:
+marca · icono + hora + temperatura · botón de seeing. Los dos cambios hay que
+resolverlos juntos, no por separado, y probablemente algo tenga que ceder —
+candidata natural: la marca "Lyrae." de la izquierda, que en la portada es
+redundante con el `h1` que viene dos pantallas más abajo.
+
 ### Dibujos definitivos de los iconos de cielo
 
 La composición por capas ya funciona y está enchufada, pero los 16 archivos de
@@ -322,6 +371,77 @@ las nubes van abajo y los cuerpos celestes arriba a la derecha.
 
 Reemplazar un archivo con el mismo nombre es todo lo que hay que hacer; no se
 toca código.
+
+---
+
+## Ilustrar los conceptos
+
+El sitio explica seeing, apertura, distancia focal y escala Bortle **solo con
+texto**. Son conceptos que se entienden mirando, no leyendo: una imagen de cielo
+despejado contra uno cubierto comunica en un segundo lo que tres párrafos no
+logran. La apuesta es que el visitante entienda el *efecto* sin tener que
+aprender el término.
+
+⚠️ **Antes de llenar "Deberías saber" hay que plegarla.** El pendiente
+"Sacarle provecho a shadcn" propone un `Accordion` ahí porque las tres tarjetas
+abiertas ya suman bastante scroll en móvil. Si además se le agregan imágenes, un
+interactivo y dos animaciones, la sección se vuelve la más larga del sitio. El
+orden correcto es: **plegar primero, llenar después** — y así cada demo se carga
+solo cuando alguien abre su tarjeta.
+
+⚠️ **Hay que decidir dónde vive cada explicación.** El pendiente "Explicar qué
+efecto tiene cada dato" (sección Pronóstico) propone popovers en los términos del
+pronóstico. Estos ilustrativos son la versión larga de lo mismo. Conviene que no
+se contradigan: el popover responde en contexto y en una frase; "Deberías saber"
+muestra el efecto y puede enlazarse desde el popover.
+
+### Cielo despejado contra cielo cubierto
+
+En el punto 01 de "Deberías saber", que hoy dice *"¡No queremos nubes!"* sin
+mostrar ninguna. Dos fotos del mismo encuadre —idealmente del propio complejo—
+valen más que la frase.
+
+- Es la misma tarjeta que debería enlazar a `#pronostico` (ver "Saltos hacia el
+  pronóstico"): la imagen explica el porqué y el enlace lleva al dato de hoy.
+
+### Cómo cambian apertura y focal la imagen de un planeta
+
+Elemento interactivo en el punto 02. Dos controles —apertura y distancia focal—
+y una imagen de planeta que responde: más apertura, más detalle y más brillo;
+más focal, imagen más grande y más oscura.
+
+- **Definir el alcance antes de construir**: esto es una demostración
+  *cualitativa*, no un simulador óptico. Si se presenta como exacto, el
+  aficionado avanzado —que sí lee estos datos— va a encontrarle el error.
+- Se puede resolver con CSS sobre una foto buena (escala + desenfoque + brillo)
+  antes que con canvas.
+- Conecta con las fichas de servicio: ahí ya están la apertura y la focal reales
+  de cada telescopio, así que la demo puede terminar en "nuestro equipo está acá".
+
+### Buen seeing contra mal seeing, en movimiento
+
+El seeing es turbulencia: es lo único de esta lista que **no se puede mostrar con
+una imagen fija**. Dos animaciones cortas del mismo planeta, una estable y otra
+hirviendo, en el punto 03.
+
+- **No usar GIF.** Pesan varios MB y el visitante típico está con señal móvil
+  irregular en la precordillera. Video `webm`/`mp4` con `preload="none"`, `muted`,
+  `loop`, `playsinline` y un `poster` estático pesa una fracción.
+- Respetar `prefers-reduced-motion`: sin animación, mostrar los dos fotogramas
+  lado a lado.
+
+### La escala Bortle, ilustrada
+
+En `SkyQuality.astro`. Hoy el bloque dice "Clase 2" y "21.94 mag/arcsec²" con una
+nota de texto; el número no significa nada para quien no conoce la escala, y es
+el mejor argumento de venta del negocio.
+
+- La comparativa clásica de los nueve cielos es material **con derechos** en casi
+  todas sus versiones. Verificar licencia antes de usarla, o encargar una propia.
+- Alternativa más honesta y más barata: **dos fotos propias** —el cielo del
+  complejo contra el cielo de una ciudad— que es exactamente la comparación que
+  al visitante le importa. Ya existe `mw-core-over-cabin.webp` para el primer
+  lado.
 
 ---
 
