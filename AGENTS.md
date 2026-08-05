@@ -8,6 +8,10 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
+`src/data/forecast.json` is generated, not versioned: `pnpm run build` writes it
+before building, and a daily GitHub Action asks Vercel for a fresh build. On a
+clean clone run `pnpm run forecast` once before `astro dev`.
+
 ## Documentation
 
 Full documentation: https://docs.astro.build

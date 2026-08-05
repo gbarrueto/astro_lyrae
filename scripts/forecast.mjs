@@ -1,7 +1,8 @@
 /**
  * Escribe `src/data/forecast.json` con el pronóstico de la noche, a partir de
- * 7Timer! ASTRO. Lo corre un cron diario; si falla, sale con código distinto de
- * cero sin tocar el archivo.
+ * 7Timer! ASTRO. Corre al principio de cada build; el archivo no se versiona.
+ * Si falla y no hay uno de antes, sale con código distinto de cero para voltear
+ * el build: en producción eso deja en pie el último despliegue bueno.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -547,7 +548,16 @@ function stripTimestamp(json) {
 	return json.replace(/"generatedAt":\s*"[^"]*",?\n?/, "");
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
 	console.error(`No se pudo generar el pronóstico: ${error.message}`);
-	process.exit(1);
+
+	// Un archivo previo solo puede venir de otra corrida en esta misma máquina:
+	// sirve para seguir trabajando sin red, y nunca existe en un build limpio.
+	const anterior = await readFile(OUTPUT, "utf8").then(
+		() => true,
+		() => false,
+	);
+	if (!anterior) process.exit(1);
+
+	console.error("Se conserva el pronóstico de la corrida anterior.");
 });

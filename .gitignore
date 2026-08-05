@@ -4,6 +4,9 @@ dist/
 # generated types
 .astro/
 
+# lo escribe scripts/forecast.mjs en cada build
+src/data/forecast.json
+
 # dependencies
 node_modules/
 
