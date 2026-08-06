@@ -8,54 +8,24 @@ on:
     - cron: "0 17 * * *"
   workflow_dispatch:
 
-# El job commitea; necesita permiso de escritura sobre el repo.
-permissions:
-  contents: write
+# El pronóstico ya no se commitea: lo escribe el build, desde el mismo script.
+# Este job solo pide ese build, así que no necesita tocar el repo.
+permissions: {}
 
 # Si una corrida se atrasa y se topa con la siguiente, que espere en vez de
-# pelear por el mismo push.
+# encolar dos despliegues por el mismo dato.
 concurrency:
   group: forecast
   cancel-in-progress: false
 
 jobs:
-  actualizar:
+  desplegar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-
-      # Sin `version`: la toma de "packageManager" en package.json, que es la
-      # misma que se usa localmente. Cuando ese campo no existía, esta acción
-      # fallaba con "No pnpm version is specified".
-      - uses: pnpm/action-setup@v6
-
-      # La versión sale de .nvmrc para no tener el número repetido en dos
-      # lugares. Ojo: es 26 acá, pero el build del sitio en Vercel corre en 24.x,
-      # que es lo más nuevo que ofrecen.
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      # --ignore-scripts salta la compilación de sharp y esbuild: el script solo
-      # necesita suncalc y el runtime de Node.
-      - run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Consultar 7Timer y escribir el pronóstico
-        run: pnpm run forecast
-
-      - name: Commitear si el pronóstico cambió
-        run: |
-          if git diff --quiet -- src/data/forecast.json; then
-            echo "El pronóstico no cambió: no hay nada que desplegar."
-            exit 0
-          fi
-
-          noche=$(node -p "require('./src/data/forecast.json').night.date")
-          veredicto=$(node -p "require('./src/data/forecast.json').night.verdict")
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/forecast.json
-          git commit -m "datos: pronóstico de la noche del $noche ($veredicto)"
-          git push
+      # El hook se crea en Vercel (Settings → Git → Deploy Hooks) apuntando a
+      # main, y viaja como secreto: quien tenga la URL puede disparar
+      # despliegues.
+      - name: Pedirle a Vercel un despliegue con el pronóstico del día
+        run: curl --fail --silent --show-error --request POST "$HOOK"
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}

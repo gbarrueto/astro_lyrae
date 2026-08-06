@@ -31,6 +31,40 @@ export type SeriesPoint = {
 /** Un tramo de la noche: un punto de la serie con su nombre. */
 export type NightSegment = SeriesPoint & { label: string };
 
+export type MoonSpan = { from: string; to: string; fromAt: string; toAt: string };
+
+export type MoonInfo = {
+	illumination: number;
+	phase: number;
+	label: string;
+	interference: "alta" | "media" | "baja";
+	rise: string | null;
+	riseAt: string | null;
+	set: string | null;
+	setAt: string | null;
+	moonlit: MoonSpan[];
+};
+
+export type NightData = {
+	date: string;
+	offset: number;
+	sunset: string;
+	sunsetAt: string;
+	darkFrom: string;
+	darkFromAt: string;
+	darkUntil: string;
+	darkUntilAt: string;
+	sunrise: string;
+	sunriseAt: string;
+	bookingDeadline: string;
+	bookingDeadlineAt: string;
+	moon: MoonInfo;
+	verdict: string;
+	headline: Phrase;
+	windWarning: Phrase | null;
+	segments: NightSegment[];
+};
+
 /** Nombre de archivo dentro de `src/assets/sky/`, sin extensión. */
 export type SkyLayer = string;
 
@@ -246,4 +280,116 @@ export function skyPicture(
 		label: described.join(", ") || "cielo",
 		daytime: isDay ? "día" : isTwilight ? "crepúsculo" : "noche",
 	};
+}
+
+/* ------------------------------------------------------------------ *
+ * Presentación de la noche
+ * ------------------------------------------------------------------ */
+
+const at = (iso: string) => new Date(iso).getTime();
+
+/** 38520000 → "10 h 42". Las duraciones se leen en horas, no en minutos. */
+export function formatDuration(msTotal: number): string {
+	const minutes = Math.max(0, Math.round(msTotal / 60000));
+	const hours = Math.floor(minutes / 60);
+	const rest = minutes % 60;
+	if (hours === 0) return `${rest} min`;
+	return rest === 0 ? `${hours} h` : `${hours} h ${String(rest).padStart(2, "0")}`;
+}
+
+/** Cuánto dura la oscuridad y cuánto de eso queda sin luna. */
+export function darkness(night: NightData) {
+	const total = at(night.darkUntilAt) - at(night.darkFromAt);
+	const lit = night.moon.moonlit.reduce(
+		(sum, span) =>
+			sum +
+			Math.max(
+				0,
+				Math.min(at(span.toAt), at(night.darkUntilAt)) -
+					Math.max(at(span.fromAt), at(night.darkFromAt)),
+			),
+		0,
+	);
+	return { total, moonless: Math.max(0, total - lit) };
+}
+
+/**
+ * El terminador es media elipse cuyo ancho depende de la fase. En el hemisferio
+ * sur la luz entra por el lado contrario al del norte.
+ */
+export function phasePath(phase: number): string {
+	const r = 42;
+	const x = Math.cos(2 * Math.PI * phase);
+	const edge = phase < 0.5 ? 0 : 1;
+	const terminator = x > 0 ? 1 - edge : edge;
+	return `M 0 ${-r} A ${r} ${r} 0 0 ${edge} 0 ${r} A ${Math.abs(x) * r} ${r} 0 0 ${terminator} 0 ${-r} Z`;
+}
+
+export type ServiceImpact = {
+	service: string;
+	href: string;
+	status: "Óptimo" | "Parcial" | "No";
+	limit: string;
+	quality: "bueno" | "regular" | "imposible";
+};
+
+/**
+ * Qué se puede hacer esta noche, servicio por servicio. El brillo de la luna
+ * limita el cielo profundo, no la observación de la Luna ni de los planetas.
+ */
+export function serviceImpact(night: NightData): ServiceImpact[] {
+	const clouded = night.verdict === "imposible" || night.verdict === "malo";
+	const bestSeeing = night.segments.reduce<string | null>(
+		(best, s) => (s.seeing?.quality === "bueno" ? "bueno" : best),
+		null,
+	);
+	const windy = night.segments.some((s) => s.wind?.quality === "malo");
+	const moon = night.moon;
+
+	const blocked = (service: string, href: string): ServiceImpact => ({
+		service,
+		href,
+		status: "No",
+		limit: "tapado por nubes",
+		quality: "imposible",
+	});
+
+	return [
+		clouded
+			? blocked("Observación Visual", "/service/observacion-visual")
+			: {
+					service: "Observación Visual",
+					href: "/service/observacion-visual",
+					status: bestSeeing ? "Óptimo" : "Parcial",
+					limit: bestSeeing ? "seeing fino" : "seeing inestable",
+					quality: bestSeeing ? "bueno" : "regular",
+				},
+
+		clouded
+			? blocked("EAA", "/service/eaa")
+			: {
+					service: "EAA",
+					href: "/service/eaa",
+					status: moon.interference === "baja" ? "Óptimo" : "Parcial",
+					limit:
+						moon.interference === "baja"
+							? "sin luna en la ventana"
+							: `luna al ${moon.illumination}%`,
+					quality: moon.interference === "baja" ? "bueno" : "regular",
+				},
+
+		clouded
+			? blocked("Fotografía Nocturna", "/service/fotografia-nocturna")
+			: {
+					service: "Fotografía Nocturna",
+					href: "/service/fotografia-nocturna",
+					status: windy || moon.interference === "alta" ? "Parcial" : "Óptimo",
+					limit: windy
+						? "viento sobre el trípode"
+						: moon.interference === "alta"
+							? "fondo iluminado"
+							: "cielo limpio y calma",
+					quality: windy || moon.interference === "alta" ? "regular" : "bueno",
+				},
+	];
 }

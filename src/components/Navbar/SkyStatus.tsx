@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { InformationCircleIcon } from "@hugeicons/core-free-icons";
+import { HelpCircleIcon } from "@hugeicons/core-free-icons";
 
 import {
 	QUALITY_TONE,
@@ -132,7 +132,7 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 							<Button
 								variant="outline"
 								size="sm"
-								className="h-7 gap-1.5 rounded-[1px] px-2"
+								className="h-7 gap-1.5 rounded-[1px] px-2 cursor-pointer"
 								aria-label={`Seeing: ${seeing.label}. Toca para saber qué significa`}
 							/>
 						}
@@ -144,7 +144,7 @@ export function SkyStatus({ series, sky, timeZone, children }: Props) {
 							)}
 						/>
 							<span className="text-xs font-medium">Seeing</span>
-						<HugeiconsIcon icon={InformationCircleIcon} data-icon="inline-end" />
+						<HugeiconsIcon icon={HelpCircleIcon} data-icon="inline-end" />
 					</PopoverTrigger>
 
 					<PopoverContent align="end" className="w-72">

@@ -152,6 +152,10 @@
     overflow-x: hidden;
     scroll-behavior: smooth;
     }
+  /* La barra superior es fija: sin esto el título del destino queda debajo. */
+  section[id] {
+    scroll-margin-top: 5rem;
+    }
   /* Objetivos táctiles cómodos en móvil */
   a, button {
     -webkit-tap-highlight-color: transparent;
