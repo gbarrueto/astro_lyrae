@@ -60,6 +60,27 @@ Agregar a `src/lib/services.ts`:
   tarifa (ver `.claude/skills/asesor-tarifas/`): un alza de precio apoyada en la
   calidad del cielo necesita que la calidad del cielo esté escrita.
 
+### El botón de reservar va antes de la condición para reservar
+
+*(fricción #1 del recorrido de visitante, semilla 418478)*
+
+En la portada, "Reservar una salida" —que abre WhatsApp directo— está **encima**
+del recuadro que explica que el servicio es solo para huéspedes. Quien llega sin
+relación con el complejo ve primero el botón y después la condición.
+
+La visitante frenó por poco y agradeció haberlo leído antes de escribir. Alguien
+más impaciente escribe primero, y del otro lado hay que explicarle por WhatsApp
+que necesita arrendar una cabaña: una conversación que empieza con un no.
+
+- El recuadro de exclusividad ya hace bien su trabajo —dice la condición y ofrece
+  la salida ("Reservar una cabaña")—; el problema es solo el **orden**.
+- Opciones, de menos a más invasiva: subir el recuadro sobre el botón; o dejar el
+  botón donde está pero con una línea corta debajo ("solo para huéspedes de Entre
+  Cordilleras"); o convertir el CTA en dos, según quien seas.
+- Ojo con no arruinar el caso mayoritario: el huésped que ya está en la cabaña
+  quiere ese botón grande y arriba. La condición tiene que llegar antes **sin**
+  meterle un paso extra a quien sí puede contratar.
+
 ### El texto introductorio ya no acompaña a las imágenes
 
 Los tres párrafos de `Intro.astro` se escribieron cuando el carrusel mostraba una
@@ -171,6 +192,32 @@ tiene varias noches y solo necesita elegir cuál.
 - Cuidado con el peso visual: la tarjeta actual ya es densa. Las noches
   siguientes probablemente quieran ser una fila compacta ("sáb 2: despejado ·
   dom 3: nublado") que al tocarla abra el detalle, no tres tarjetas completas.
+
+### Noches más lejanas, en un bloque aparte y con menos precisión
+
+*(fricción #3 del recorrido de visitante, semilla 418478)*
+
+Las tres noches que muestra el panel son las de esta semana. Para quien está
+**armando un viaje** —todavía sin reserva, o con fecha a diez días— no responden
+nada: ve que el servicio existe y que informan honesto, pero no puede proyectarlo
+a sus fechas.
+
+Es un usuario distinto del huésped que ya está en la cabaña, así que **no debe
+compartir el mismo control**. Mezclar "hoy / mañana / jueves" con "el fin de
+semana del 20" en el mismo selector confunde las dos preguntas y le da a un
+pronóstico a diez días la misma apariencia de certeza que al de esta noche.
+
+- **Bloque aparte**, después del panel de la noche vigente, con su propio título
+  del tipo "¿Y para más adelante?".
+- **Decir explícitamente que es menos preciso.** Un modelo a 7–10 días acierta la
+  tendencia, no la noche. Si se presenta igual que el de hoy, la primera vez que
+  falle se lleva puesta la credibilidad del bloque que sí es bueno.
+- Menos datos, no los mismos: a esa distancia solo tiene sentido nubosidad y algo
+  de luna —la fase de la luna sí es exacta con meses de anticipación, y para
+  fotografía es *el* dato que decide.
+- Fuente por definir: 7Timer llega a 72 h, así que esto necesita otra API
+  (Open-Meteo entrega 16 días sin clave). Al ser fuente distinta, con más razón
+  conviene que viva en su propio bloque y no intercalada.
 
 ### La noche cruza medianoche: mostrar los dos días
 
@@ -554,6 +601,16 @@ Debería además bajar bastante el tiempo por página.
 Ambas son el mismo sesgo: juzgar el catálogo desde el perfil del visitante en
 vez de juzgar la experiencia del sitio. Un servicio que no es para alguien es
 segmentación, no una falta.
+
+- **"Quien entra directo a `#pronostico` nunca ve el aviso de exclusividad"**
+  *(semilla 418478)*. El supuesto no se sostiene: una sección suelta no explica
+  dónde estás parado, y lo que hace cualquiera al aterrizar a media página es
+  subir a ver de qué se trata. Y aunque no lo hiciera, **la reserva se confirma
+  siempre por WhatsApp**, donde lo primero que se pregunta es si tiene cabaña. El
+  costo máximo del malentendido es un mensaje, no una venta perdida.
+  Distinto es el orden de los botones en la portada, que sí quedó anotado
+  (sección Contenido): ahí el visitante **está** mirando la condición y el botón
+  al mismo tiempo, y el botón va primero.
 
 ---
 

@@ -17,6 +17,23 @@ de un turista confundido, no la de un desarrollador diagnosticando.
 
 No arregles nada. Esta skill solo observa y reporta.
 
+### El visitante no tiene memoria
+
+**Es la primera vez que ve el sitio. No hay una vez anterior.** Si en esta misma
+conversación se discutió el sitio, se leyó código, se corrió otro recorrido o se
+implementó un pendiente, **nada de eso existe para el visitante**.
+
+Están prohibidas las comparaciones con estados anteriores. Si te sale escribir
+*"esta vez hay un botón"*, *"ahora sí enlaza"*, *"antes esto no estaba"* o
+*"el rediseño quedó mejor"*, borra la frase: eso lo sabe el desarrollador, no la
+persona que acaba de abrir la página. La versión correcta es simplemente
+*"hay un botón que dice X"*.
+
+Vale para los elogios tanto como para las quejas: reconocer una mejora es
+delatar que sabías cómo estaba antes. Si el recorrido anterior sigue en el
+contexto, esa contaminación es el riesgo principal de este ejercicio — y su
+síntoma es cualquier frase que solo tenga sentido si comparas dos versiones.
+
 ## La separación que evita falsos positivos
 
 Hay dos fuentes de información y **no se mezclan**:
@@ -83,12 +100,21 @@ Muestra el perfil completo al usuario antes de empezar.
 
 Verifica el dev server (`astro dev status`; si no corre, `astro dev --background`).
 
+**Usa el viewport que trae el perfil, siempre.** `perfil.sh` sortea un
+dispositivo concreto y emite la línea `Viewport` con la orden ya armada. No
+inventes dimensiones ni uses las de otro recorrido: el ancho cambia el layout, y
+juzgar "se ve apretado" en el ancho equivocado es inventar una fricción.
+
 ```bash
 V=.claude/skills/visitante/scripts/visita.mjs
-node $V abrir /                          # móvil (390×844) por defecto
-node $V abrir / --ancho=1280 --alto=800  # si el perfil dice notebook
-node $V auditar                          # los hechos verificables
+node $V abrir / --ancho=360 --alto=800    # lo que diga la línea Viewport del perfil
+node $V auditar                           # los hechos verificables
 ```
+
+El viewport CSS no es la resolución de la pantalla: el navegador se queda con
+parte del alto, y en Windows el escalado al 150 % —lo normal en un Full HD de
+14"— deja 1280 px CSS de ancho en un equipo de 1920. Por eso el perfil trae el
+número útil ya calculado.
 
 `auditar` tarda ~3 s y recarga la página recorriéndola entera. Guarda su salida:
 es tu única autoridad sobre qué está realmente roto. **Léela fuera de personaje
@@ -148,11 +174,21 @@ node $V mirar --nombre=todo                 # la página entera
 Dos o tres capturas por recorrido, no diez. Los archivos quedan en
 `/mnt/c/Users/Public/astshots/`.
 
+**No juzgues tamaños ni superposiciones desde una captura de sección.** `--sel`
+recorta un trozo del documento, así que la barra fija y los popovers salen a una
+escala y en una posición que nadie ve nunca así; por eso se ocultan, y si había
+alguno abierto la orden te lo avisa. Para decir "esto tapa aquello" o "esto se
+ve enorme" usa `--y`, que fotografía el viewport tal como está.
+
+Y ojo: **con un popover abierto el sitio bloquea el scroll**, así que un `--y`
+posterior sale mal encuadrado. Cierra la capa antes de capturar otra cosa.
+
 ### 6. Reportar
 
 Formato de salida, en español, en este orden:
 
-**Perfil** — el bloque del script, tal cual.
+**Perfil** — el bloque del script, tal cual, **incluida la línea `Viewport`**:
+quien lea el informe tiene que poder reproducirlo en el mismo ancho.
 
 **Recorrido** — una entrada por momento, en primera persona y en presente: qué
 ve, qué piensa, qué toca, qué pasa al tocarlo. Corto y concreto. Incluye lo que

@@ -242,6 +242,19 @@ const TEXTO_VISIBLE = `
   }
   return out;`;
 
+// Una imagen sin dimensiones reservadas empuja todo lo que tiene debajo cuando
+// termina de cargar. Si se mide antes de eso, el toque cae en el vacío.
+const ESPERAR_IMAGENES = `
+  const pendientes = () => [...document.images].filter(i => {
+    if (i.complete) return false;
+    const r = i.getBoundingClientRect();
+    return r.top < innerHeight * 2 && r.bottom > -innerHeight;
+  }).length;
+  return new Promise(res => {
+    let i = 0;
+    const t = setInterval(() => { if (!pendientes() || ++i > 30) { clearInterval(t); res(1); } }, 100);
+  });`;
+
 const pinta = (nodos, alto) => {
 	let pliegue = false;
 	const lineas = [];
@@ -267,19 +280,26 @@ async function irA(ctx, ruta, ancho, alto) {
 }
 
 // La barra del dev toolbar no existe para un visitante. Y al recortar una
-// sección, la barra fija del sitio aparecería flotando en mitad del recorte:
-// es un artefacto del encuadre, no algo que nadie llegue a ver así.
+// sección, todo lo que flota respecto del viewport —barra fija, popovers en
+// portal— aparece pegado en mitad del recorte, en un tamaño y una posición que
+// nadie ve nunca así. Es un artefacto del encuadre y hay que sacarlo.
+const FLOTANTES = '[role=dialog],[role=tooltip],[role=menu],[role=listbox],[popover],[data-floating-ui-portal]';
 const OCULTAR = (sinFijos) => `
   const s = document.createElement('style');
   s.id = '__visita_css__';
   s.textContent = 'astro-dev-toolbar{display:none !important}';
   document.head.appendChild(s);
   // visibility (y no display) para no mover nada de sitio al ocultarlos.
-  ${sinFijos ? `for (const el of document.querySelectorAll('body *')) {
+  ${sinFijos ? `let capas = 0;
+  for (const el of document.querySelectorAll('body *')) {
     const p = getComputedStyle(el).position;
-    if (p === 'fixed' || p === 'sticky') el.dataset.visitaOculto = (el.style.visibility = 'hidden', '1');
-  }` : ''}
-  return 1;`;
+    const flota = p === 'fixed' || p === 'sticky' || el.matches(${JSON.stringify(FLOTANTES)});
+    if (!flota) continue;
+    if (el.matches(${JSON.stringify(FLOTANTES)}) && el.getBoundingClientRect().width > 0) capas++;
+    el.dataset.visitaOculto = (el.style.visibility = 'hidden', '1');
+  }
+  if (capas) console.warn('[visita] ' + capas + ' capa(s) flotante(s) abiertas, ocultadas para el recorte');
+  return capas;` : 'return 0;'}`;
 const MOSTRAR = `
   document.getElementById('__visita_css__')?.remove();
   for (const el of document.querySelectorAll('[data-visita-oculto]')) {
@@ -289,7 +309,8 @@ const MOSTRAR = `
 
 async function capturar(ctx, nombre, opciones = {}, sinFijos = false) {
 	mkdirSync(OUT, { recursive: true });
-	await ctx.js(OCULTAR(sinFijos));
+	const capas = await ctx.js(OCULTAR(sinFijos));
+	if (capas) console.log(`(había ${capas} capa flotante abierta; se ocultó para encuadrar la sección)`);
 	await espera(200); // que el compositor alcance a repintar antes del disparo
 	try {
 		const r = await ctx.cmd('Page.captureScreenshot', { format: 'webp', quality: 82, ...opciones });
@@ -353,7 +374,11 @@ const ordenes = {
 		if (!p) { console.log(`no encontré nada que tocar con «${objetivo}»`); return; }
 
 		await ctx.js(ESPERAR_ISLAS); // tras el scroll puede haber una isla client:visible recién montándose
-		const caja = await ctx.js(`
+		await ctx.js(ESPERAR_IMAGENES); // una imagen que termina de cargar empuja el layout y mueve el objetivo
+		// Se vuelve a medir pegado al toque y se comprueba que el punto siga cayendo
+		// dentro del objetivo: si no, el tap aterriza en otra cosa y el recorrido
+		// concluye "toqué y no pasó nada" cuando en realidad no lo tocó.
+		const medir = `
       const q = ${JSON.stringify(objetivo)};
       const cand = /^[.#\\[]/.test(q) ? [...document.querySelectorAll(q)]
         : [...document.querySelectorAll('button,a,[role=button],[role=tab],[role=radio],summary,input,label')]
@@ -361,8 +386,20 @@ const ordenes = {
             .concat([...document.querySelectorAll('button,a,[role=button],[role=tab]')]
               .filter(el => el.innerText?.trim().includes(q)));
       const el = cand.find(e => e.getBoundingClientRect().width > 0);
+      if (!el) return null;
       const r = el.getBoundingClientRect();
-      return { x: r.x + r.width / 2, y: r.y + r.height / 2, w: Math.round(r.width), h: Math.round(r.height) };`);
+      if (r.bottom < 0 || r.top > innerHeight) el.scrollIntoView({ block: 'center', behavior: 'instant' });
+      const b = el.getBoundingClientRect();
+      const x = b.x + b.width / 2, y = b.y + b.height / 2;
+      const encima = document.elementFromPoint(x, y);
+      return { x, y, w: Math.round(b.width), h: Math.round(b.height),
+               acierta: !!encima && (el.contains(encima) || encima.contains(el)),
+               estorba: encima && !(el.contains(encima) || encima.contains(el))
+                 ? encima.tagName.toLowerCase() + '.' + String(encima.className.baseVal ?? encima.className).slice(0, 40) : null };`;
+		let caja = await ctx.js(medir);
+		if (caja && !caja.acierta) { await espera(400); caja = await ctx.js(medir); }
+		if (!caja) { console.log(`no encontré nada que tocar con «${objetivo}»`); return; }
+		if (!caja.acierta) console.log(`ojo: en el punto del toque hay ${caja.estorba ?? 'nada'}, encima del objetivo`);
 
 		const tactil = ctx.movil;
 		if (tactil) {
