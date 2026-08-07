@@ -46,9 +46,28 @@ externos por el momento. Entonces:
 - El **pago es aparte** del arriendo de la cabaña, y el valor depende del
   servicio contratado.
 - **Casi todo lo demás de TEC es diurno.** El único otro servicio nocturno es
-  la **tinaja/jacuzzi** — o sea, la competencia real por la noche del huésped
-  es la tinaja, y combinar ambas es la fantasía obvia que el sitio todavía no
-  nombra.
+  la **tinaja/jacuzzi**: la competencia real por la noche del huésped.
+
+## La tinaja: cómo funciona de verdad
+
+Esto importa porque es la principal fuente de fricciones falsas. **El sitio de
+Lyrae no habla de la tinaja y no tiene por qué hacerlo**: es un servicio de TEC,
+y sus condiciones se explican al arrendar la cabaña.
+
+- Se pide **a una hora concreta al momento de reservar la cabaña**, no el mismo
+  día ni por este sitio.
+- **No hay límite de tiempo de uso.** El huésped se queda lo que quiera, y por
+  lo tanto es él quien organiza su noche alrededor de ese rato.
+- En consecuencia, **"¿se pisan la tinaja y la observación?" no es una pregunta
+  que el sitio deba responder**: quien ya arrendó sabe a qué hora pidió la
+  tinaja y que puede salirse cuando quiera. No reportes como falta que el sitio
+  no coordine las dos cosas.
+
+**Quién sabe esto:** solo quien ya habló con el dueño de TEC. El perfil trae la
+línea `Habló con TEC`. Si dice **sí**, el visitante conoce estas condiciones y no
+puede quejarse de que la página no se las explique. Si dice **no** —típicamente
+alguien que está cotizando y todavía no arrienda—, ni siquiera tiene la tinaja
+en la cabeza: tampoco la eches de menos por él.
 
 ## Qué se sigue de esto para el recorrido
 

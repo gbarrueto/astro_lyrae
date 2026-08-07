@@ -86,9 +86,14 @@ El rasgo **Etapa** manda sobre los demás:
   semanas de anticipación: el pronóstico de esta noche no le sirve de nada.
 - `EVALUANDO` — todavía no arrienda. El sitio funciona como argumento de venta
   del complejo; su pregunta de fondo es "¿esto justifica arrendar acá?".
-- `EXTERNO` — **no puede contratar**, y el sitio no se lo dice en ninguna parte.
-  Su recorrido termina en un malentendido: llega hasta el WhatsApp creyendo que
-  puede reservar un tour suelto. Repórtalo como tal.
+- `EXTERNO` — **no puede contratar**: llega creyendo que se vende un tour suelto.
+  Comprueba en el recorrido dónde y cuándo se entera, y si el sitio lo reencamina
+  a arrendar. Que no pueda contratar es segmentación, no una falta: lo que se
+  evalúa es cuánto tarda en saberlo y qué salida le ofrecen.
+
+El perfil trae además **`Habló con TEC`**. Si dice que sí, el visitante conoce
+las condiciones de la cabaña —incluida la tinaja, ver `contexto.md`— y no puede
+reclamar que el sitio no se las explique.
 
 Si la Etapa vuelve irrelevante el Objetivo sorteado (p. ej. `RESERVADO` con
 "saber si estará despejado esta noche"), reinterprétalo a la misma pregunta en
@@ -107,9 +112,20 @@ juzgar "se ve apretado" en el ancho equivocado es inventar una fricción.
 
 ```bash
 V=.claude/skills/visitante/scripts/visita.mjs
-node $V abrir / --ancho=360 --alto=800    # lo que diga la línea Viewport del perfil
-node $V auditar                           # los hechos verificables
+node $V abrir / --ancho=360 --alto=800 --hora=22:15   # viewport y hora del perfil
+node $V auditar                                       # los hechos verificables
 ```
+
+**Usa también la hora del perfil.** `--hora=HH:MM` desplaza el reloj de la página
+(acepta `"AAAA-MM-DD HH:MM"`, y `--hora=real` vuelve al del sistema). Sin eso el
+recorrido ocurre siempre a la hora en que se está trabajando, y este sitio cambia
+harto según la hora: el plazo de aviso vence, la noche vigente pasa a ser la de
+ayer, el marcador «AHORA» se mueve por la línea de tiempo. Un perfil que dice
+"16:00, planificando" y una página que marca las 02:00 no describen a nadie.
+
+Con el reloj simulado, el HTML llega del servidor con la hora real y el cliente
+lo hidrata con la falsa: eso provoca un aviso de hidratación en consola que
+**`auditar` ignora y te lo avisa**. No es del sitio.
 
 El viewport CSS no es la resolución de la pantalla: el navegador se queda con
 parte del alto, y en Windows el escalado al 150 % —lo normal en un Full HD de
@@ -137,6 +153,11 @@ detente donde se detendría ella**, no leas la página entera antes de opinar.
 Las marcas `[ACTIVO]`, `[ABIERTO]`, `[DESACTIVADO]` y el `href` de cada enlace
 te dicen el estado de los controles. Lo que no aparece en `ver` es porque no se
 ve: si un texto está tapado o recortado, para el visitante no existe.
+
+**`[TOCABLE: etiqueta]` marca lo que esconde algo detrás.** Un control cuyo
+contenido se dibuja en varias cajas aparece partido en líneas sueltas y no se
+nota que es un botón; esa marca lo delata. **Tócalos antes de decir que un dato
+falta** — un detalle plegado no es un dato ausente.
 
 ### 4. Tocar
 

@@ -2,7 +2,8 @@
 // Pilotea el navegador por CDP en vez de sacarle fotos por línea de comandos.
 //
 // Uso: visita.mjs <orden> [args]
-//   abrir  [ruta] [--ancho=390] [--alto=844]   carga una página y la deja abierta
+//   abrir  [ruta] [--ancho=390] [--alto=844] [--hora=19:30]
+//                                              carga una página y la deja abierta
 //   ver    [--desde=0] [--hasta=N]             el texto visible, en orden de lectura
 //   tocar  <texto|selector>                    un toque real, y qué cambió con él
 //   deslizar <izq|der> [--sel=CSS]             gesto de swipe (así se navega el carrusel)
@@ -62,6 +63,40 @@ async function navegador() {
 
 const sucesos = { consola: [], red: [], respuestas: [] };
 
+// Sin esto, el recorrido solo puede ocurrir a la hora en que uno está trabajando,
+// y este sitio cambia bastante según la hora: el plazo de aviso vence, la noche
+// vigente pasa a ser la de ayer, el marcador «AHORA» se mueve por la línea de
+// tiempo. Se desplaza el reloj de la página con un desfase fijo, así todas las
+// APIs de fecha quedan corridas de forma coherente.
+function desfaseHasta(txt) {
+	const ahora = new Date();
+	let t;
+	if (/^\d{1,2}:\d{2}$/.test(txt)) {
+		const [h, m] = txt.split(':').map(Number);
+		t = new Date(ahora);
+		t.setHours(h, m, 0, 0);
+	} else {
+		t = new Date(txt.replace(' ', 'T'));
+	}
+	if (Number.isNaN(t.getTime())) throw new Error(`no entiendo la hora «${txt}»; usa HH:MM o "AAAA-MM-DD HH:MM"`);
+	return t.getTime() - ahora.getTime();
+}
+
+// Siempre se parte del Date original, nunca del ya desfasado: si no, aplicarlo
+// dos veces suma dos desfases y la hora simulada deja de ser la pedida.
+const RELOJ = (ms) => `(() => {
+  const R = window.__visitaDateReal || Date;
+  window.__visitaDateReal = R;
+  window.__visitaReloj = ${ms};
+  const off = ${ms};
+  if (!off) { window.Date = R; return; }
+  const D = function (...a) { return a.length ? new R(...a) : new R(R.now() + off); };
+  D.now = () => R.now() + off;
+  D.parse = R.parse; D.UTC = R.UTC; D.prototype = R.prototype;
+  Object.setPrototypeOf(D, R);
+  window.Date = D;
+})()`;
+
 async function conectar() {
 	const v = await navegador();
 	const ws = new WebSocket(v.webSocketDebuggerUrl);
@@ -112,6 +147,13 @@ async function conectar() {
 	for (const d of ['Page.enable', 'Runtime.enable', 'Log.enable', 'Network.enable', 'DOM.enable']) await cmd(d);
 	await cmd('Page.bringToFront').catch(() => {});
 
+	// El desfase del reloj sobrevive entre órdenes: se reinstala en cada sesión
+	// para que cualquier navegación posterior siga viendo la hora simulada.
+	if (guardado.desfase) {
+		await cmd('Page.addScriptToEvaluateOnNewDocument', { source: RELOJ(guardado.desfase) });
+		await cmd('Runtime.evaluate', { expression: RELOJ(guardado.desfase) }).catch(() => {});
+	}
+
 	const js = async (expr) => {
 		const r = await cmd('Runtime.evaluate', { expression: `(() => {${expr}})()`, returnByValue: true, awaitPromise: true });
 		if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
@@ -121,7 +163,8 @@ async function conectar() {
 	// emulación, navigator.maxTouchPoints no es de fiar.
 	const movil = guardado.movil ?? true;
 	const recordar = (datos) => writeFileSync(ESTADO, JSON.stringify({ ...guardado, targetId, ...datos }));
-	return { cmd, js, enviar, targetId, movil, recordar, cerrar: () => ws.close() };
+	const reloj = { desfase: guardado.desfase || 0, guionReloj: guardado.guionReloj || null };
+	return { cmd, js, enviar, targetId, movil, desfase: reloj.desfase, reloj, recordar, cerrar: () => ws.close() };
 }
 
 // ── Piezas compartidas ──────────────────────────────────────────────────────
@@ -190,6 +233,7 @@ const LEER = (max = 110) => `
   }
 
   const salida = [];
+  const vistos = new Set();
   for (const e of orden) {
     if (!e.el) { salida.push(e); continue; }
     const el = e.el, r = el.getBoundingClientRect();
@@ -199,6 +243,14 @@ const LEER = (max = 110) => `
     const act = el.closest('a[href],button,[role=button],[role=tab],[role=radio]') || el;
     const marcas = [];
     if (act.tagName === 'A') marcas.push(act.getAttribute('href'));
+    // Un control cuyos hijos son cajas propias se desarma en trozos sueltos y
+    // deja de parecer tocable: sin esta marca, el recorrido nunca lo toca y
+    // reporta como ausente lo que el control esconde detrás.
+    if (act !== el && !vistos.has(act)) {
+      vistos.add(act);
+      const etq = act.getAttribute('aria-label');
+      marcas.push('TOCABLE' + (etq ? ': ' + etq : ''));
+    }
     // Un control puede anunciarse activo de cuatro formas según el patrón que
     // use (tab, radio, toggle, navegación); si solo se mira una, el recorrido
     // reporta "no se ve cuál está elegido" cuando sí se ve.
@@ -276,6 +328,10 @@ async function irA(ctx, ruta, ancho, alto) {
 		await espera(250);
 	}
 	await ctx.js(ESPERAR_ISLAS);
+	// Hidratar no es lo mismo que asentarse: hay bloques que resuelven su estado
+	// contra el reloj un momento después (el aviso del plazo tarda ~0,9 s medidos).
+	// Leer antes de eso hace reportar como ausente un texto que sí aparece.
+	await espera(700);
 	return url;
 }
 
@@ -328,8 +384,19 @@ const ordenes = {
 	async abrir(ctx) {
 		const ancho = +(banderas.ancho || 390);
 		const alto = +(banderas.alto || 844);
-		ctx.recordar({ ancho, alto, movil: ancho < 700 });
+		let { desfase, guionReloj } = ctx.reloj;
+		if (banderas.hora) {
+			desfase = banderas.hora === 'real' ? 0 : desfaseHasta(banderas.hora);
+			// Se retira el guion anterior para que no se acumulen uno por corrida.
+			if (guionReloj) await ctx.cmd('Page.removeScriptToEvaluateOnNewDocument', { identifier: guionReloj }).catch(() => {});
+			({ identifier: guionReloj } = await ctx.cmd('Page.addScriptToEvaluateOnNewDocument', { source: RELOJ(desfase) }));
+		}
+		ctx.recordar({ ancho, alto, movil: ancho < 700, desfase, guionReloj });
 		const url = await irA(ctx, libre[0] || '/', ancho, alto);
+		if (desfase) {
+			const t = await ctx.js('return new Date().toLocaleString("es-CL")');
+			console.log(`reloj simulado: ${t}  (desfase ${Math.round(desfase / 60000)} min)`);
+		}
 		const m = await ctx.js(`
       const d = document.documentElement;
       const caja = el => (el.firstElementChild || el).getBoundingClientRect();
@@ -526,7 +593,18 @@ const ordenes = {
               .slice(0, 6).map(el => el.tagName.toLowerCase() + '.' + String(el.className.baseVal ?? el.className).slice(0, 50))
           : [],
         sinAlt: [...document.querySelectorAll('img:not([alt])')].map(el => el.currentSrc.split('/').pop()).slice(0, 8),
+        // Los puntitos de un carrusel indican en qué lámina vas; no son blancos
+        // que alguien apunte con el dedo —ese componente se navega deslizando—,
+        // así que medirlos como botones inventa una fricción que nadie tiene.
+        // Se reconocen sin depender del markup: sin texto, diminutos y en grupo.
         chicos: [...document.querySelectorAll('button,a,[role=button],[role=tab]')]
+          .filter(el => {
+            const r = el.getBoundingClientRect();
+            if (el.innerText.trim() || Math.min(r.width, r.height) > 16) return true;
+            const hermanos = [...(el.parentElement?.children ?? [])]
+              .filter(h => h.tagName === el.tagName && h.getBoundingClientRect().height <= 16);
+            return hermanos.length < 2;
+          })
           .filter(el => vis(el) && getComputedStyle(el).display !== 'inline')
           .map(el => ({ t: (el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 28), r: el.getBoundingClientRect() }))
           .filter(o => o.r.width < 44 || o.r.height < 44)
@@ -538,7 +616,12 @@ const ordenes = {
 
 		const linea = (t, xs) => console.log(xs.length ? `${t}\n  ${xs.join('\n  ')}` : `${t} ninguno`);
 		console.log(`# hechos verificables de ${url}\n`);
-		linea('errores de consola:', [...new Set(sucesos.consola)].slice(0, 6));
+		// Con el reloj simulado el HTML llega del servidor con la hora real y el
+		// cliente lo hidrata con la falsa: el desajuste lo provocamos nosotros.
+		const propios = (t) => ctx.desfase && /hydrat|did not match|didn't match/i.test(t);
+		const consola = [...new Set(sucesos.consola)].filter((t) => !propios(t));
+		if (ctx.desfase) console.log(`(reloj simulado: se ignoran los avisos de hidratación, los causa el desfase)\n`);
+		linea('errores de consola:', consola.slice(0, 6));
 		linea('peticiones fallidas:', [...new Set(sucesos.red)].slice(0, 6));
 		linea('respuestas 4xx/5xx:', [...new Set(sucesos.respuestas)].slice(0, 6));
 		console.log(`desborde horizontal: ${d.sw > d.vw ? `SÍ (${d.sw} > ${d.vw})` : 'no'}`);

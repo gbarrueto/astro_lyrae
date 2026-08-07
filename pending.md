@@ -81,6 +81,30 @@ que necesita arrendar una cabaña: una conversación que empieza con un no.
   quiere ese botón grande y arriba. La condición tiene que llegar antes **sin**
   meterle un paso extra a quien sí puede contratar.
 
+### El precio de la portada no es el precio del grupo
+
+*(fricción #1 del recorrido de visitante, semilla 416451)*
+
+La tarjeta de portada dice *"desde $15.000 por salida"*. Un huésped que viene con
+cuatro amigos paga **$30.000**: el valor cubre hasta 2 personas y cada adulto
+adicional suma $5.000. El número que ve primero es la mitad del que va a pagar, y
+para llegar al suyo tiene que entrar a la ficha, leer la regla y multiplicar.
+
+No es un problema de nivel de precio —repartido entre cinco son $6.000 por
+cabeza, que nadie discute— sino de que **el visitante hace la cuenta solo**, y el
+que no la hace se lleva una sorpresa al escribir.
+
+- Lo más barato: un ejemplo concreto junto a la tarifa ("para 4 personas:
+  $25.000"), que ancla el orden de magnitud sin construir nada.
+- Lo que de verdad resuelve: un **selector de cuántos van** —adultos y niños— que
+  muestre el total. `mainPrice()` y los `PriceTier[]` de `src/lib/services.ts` ya
+  tienen los datos; falta la aritmética y dónde ponerla.
+- Dónde vive: la ficha es el lugar natural, pero el problema nace en la portada.
+  Evaluar si la tarjeta debería decir "desde $15.000 · 2 personas" para que el
+  "desde" tenga referente.
+- Ojo con la fotografía nocturna, que tiene otra estructura (sola o sumada a otra
+  salida): la calculadora no puede asumir el mismo modelo para los tres.
+
 ### El texto introductorio ya no acompaña a las imágenes
 
 Los tres párrafos de `Intro.astro` se escribieron cuando el carrusel mostraba una
@@ -537,6 +561,32 @@ experiencia / equipamiento / antes de reservar. Acortaría mucho la página, per
 esconde contenido que hoy se encuentra bajando, y en los recorridos simulados el
 aficionado avanzado sí leía el equipamiento completo. No hacerlo sin evaluarlo
 antes.
+
+### Evaluar una versión de escritorio
+
+*(fricción #3 del recorrido de visitante, semilla 416451 — primer recorrido en
+1920×969 real)*
+
+El sitio es mobile-first a propósito y eso no está en discusión. Pero en una
+pantalla de 1920 el contenido vive en una franja central de ~510 px con los dos
+costados vacíos: el panel del pronóstico ocupa poco más de un cuarto del ancho
+disponible. Se lee perfecto; simplemente da la sensación de una página de
+teléfono estirada.
+
+Es **evaluar**, no hacer. Antes de mover nada conviene saber cuánta gente entra
+por escritorio: si el huésped mira desde el teléfono en la cabaña, esto no vale
+la pena; si el que *evalúa arrendar* lo hace desde el notebook en su casa, la
+portada es material de venta y ahí sí importa.
+
+- La sección que mejor aprovecha el ancho hoy es la rejilla "Antes de reservar"
+  de la ficha de servicio: seis tarjetas en dos columnas, todo visible sin
+  scroll. Es la referencia de lo que se puede lograr.
+- Candidatos naturales a dos columnas: el panel del pronóstico (veredicto y
+  "Qué se puede hacer" al lado de la línea de tiempo, que hoy va abajo) y el
+  bloque de contacto.
+- **No ensanchar por ensanchar.** Un `max-width` mayor en los bloques de texto
+  largo empeora la lectura; lo que gana es reorganizar en columnas lo que hoy es
+  una pila vertical.
 
 ---
 
