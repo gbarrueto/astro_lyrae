@@ -25,7 +25,19 @@ jobs:
       # El hook se crea en Vercel (Settings → Git → Deploy Hooks) apuntando a
       # main, y viaja como secreto: quien tenga la URL puede disparar
       # despliegues.
+      #
+      # --retry cubre justo lo que falla acá: timeouts, cortes de conexión y
+      # 5xx, que es lo que devolvió el hook la primera vez que corrió esto. No
+      # se usa --retry-all-errors a propósito: un 401 o un 404 significan
+      # secreto vencido o hook borrado, y reintentar eso solo tapa el aviso.
+      #
+      # --fail-with-body en vez de --fail para que el cuerpo de la respuesta
+      # quede en el log; con --fail curl lo descarta y solo queda el código,
+      # que no alcanza para saber si el problema es de Vercel o del secreto.
       - name: Pedirle a Vercel un despliegue con el pronóstico del día
-        run: curl --fail --silent --show-error --request POST "$HOOK"
+        run: >-
+          curl --request POST "$HOOK"
+          --fail-with-body --silent --show-error
+          --retry 3 --retry-delay 10 --max-time 30
         env:
           HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
